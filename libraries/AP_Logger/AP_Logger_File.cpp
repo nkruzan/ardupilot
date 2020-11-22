@@ -1010,6 +1010,11 @@ void AP_Logger_File::io_timer(void)
 
 bool AP_Logger_File::io_thread_alive() const
 {
+    // if the io thread hasn't had a heartbeat in a full seconds then it is dead
+    // this is enough time for a sdcard remount
+#if HAL_BOARD_NAME == "ESP32" 
+    return (AP_HAL::millis() - _io_timer_heartbeat) < 10000U;
+#endif 
     if (!hal.scheduler->is_system_initialized()) {
         // the system has long pauses during initialisation
         return false;
