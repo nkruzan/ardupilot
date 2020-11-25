@@ -304,6 +304,12 @@ void NavEKF2::Log_Write()
 
 void NavEKF2_core::Log_Write(uint64_t time_us)
 {
+    float yaw_composite = 0.0f;
+    float yaw_composite_variance = 0.0f;
+    float yaw[N_MODELS_EKFGSF];
+    float ivn[N_MODELS_EKFGSF];
+    float ive[N_MODELS_EKFGSF];
+   float wgt[N_MODELS_EKFGSF];
     // note that several of these functions exit-early if they're not
     // attempting to log the primary core.
     Log_Write_NKF1(time_us);
@@ -315,6 +321,46 @@ void NavEKF2_core::Log_Write(uint64_t time_us)
     Log_Write_Quaternion(time_us);
     Log_Write_GSF(time_us);
 
+yaw_composite=yaw_composite;
+yaw_composite_variance=yaw_composite_variance;
+//yaw=yaw;
+  if (getDataEKFGSF(_core, yaw_composite, yaw_composite_variance, yaw, ivn, ive, wgt)) {
+
+  /*
+        AP::logger().Write("NKY0",
+                        "TimeUS,C,YC,YCS,Y0,Y1,Y2,Y3,Y4,W0,W1,W2,W3,W4",
+                        "s#rrrrrrr-----",
+                        "F-000000000000",
+                        "QBffffffffffff",
+                        time_us,
+                        DAL_CORE(_core),
+                        yaw_composite,
+                        sqrtf(MAX(yaw_composite_variance, 0.0f)),
+                        yaw[0],
+                        yaw[1],
+                        yaw[2],
+                        yaw[3],
+                        yaw[4],
+                        wgt[0],
+                        wgt[1],
+                        wgt[2],
+                        wgt[3],
+                        wgt[4]);
+*/
+        // @LoggerMessage: NKY1
+        // @Description: EKF2 Yaw Estimator Innovations
+        // @Field: TimeUS: Time since system startup
+        // @Field: C: EKF2 core this data is for
+        // @Field: IVN0: North velocity innovation from individual EKF filter 0 (m/s)
+        // @Field: IVN1: North velocity innovation from individual EKF filter 1 (m/s)
+        // @Field: IVN2: North velocity innovation from individual EKF filter 2 (m/s)
+        // @Field: IVN3: North velocity innovation from individual EKF filter 3 (m/s)
+        // @Field: IVN4: North velocity innovation from individual EKF filter 4 (m/s)
+        // @Field: IVE0: East velocity innovation from individual EKF filter 0 (m/s)
+        // @Field: IVE1: East velocity innovation from individual EKF filter 1 (m/s)
+        // @Field: IVE2: East velocity innovation from individual EKF filter 2 (m/s)
+        // @Field: IVE3: East velocity innovation from individual EKF filter 3 (m/s)
+        // @Field: IVE4: East velocity innovation from individual EKF filter 4 (m/s)
     // write range beacon fusion debug packet if the range value is non-zero
     Log_Write_Beacon(time_us);
 
