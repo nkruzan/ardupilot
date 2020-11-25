@@ -332,7 +332,7 @@ void NavEKF2_core::Log_Write_GSF(uint64_t time_us) const
     float yaw[N_MODELS_EKFGSF];
     float ivn[N_MODELS_EKFGSF];
     float ive[N_MODELS_EKFGSF];
-    float wgt[N_MODELS_EKFGSF];
+   float wgt[N_MODELS_EKFGSF];
 
     if (!yawEstimator->getLogData(yaw_composite, yaw_composite_variance, yaw, ivn, ive, wgt)) {
         return;
