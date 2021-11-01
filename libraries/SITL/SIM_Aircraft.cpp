@@ -281,7 +281,11 @@ void Aircraft::sync_frame_time(void)
     }
     if (sleep_debt_us > min_sleep_time) {
         // sleep if we have built up a debt of min_sleep_tim
+#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
         usleep(sleep_debt_us);
+#else
+        // ??
+#endif
         sleep_debt_us -= (get_wall_time_us() - now);
     }
     last_wall_time_us = get_wall_time_us();
