@@ -104,6 +104,11 @@ AUTOBUILD_BOARDS = ["fmuv2",
                     "SITL_arm_linux_gnueabihf",
                     ]
 
+ESP32_BOARDS = ["esp32buzz",
+                "esp32diy",
+                "esp32icarus",
+                ]
+
 AP_PERIPH_BOARDS = ["f103-GPS",
                     "f103-QiotekPeriph",
                     "f103-ADSB",
