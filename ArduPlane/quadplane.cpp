@@ -2912,7 +2912,11 @@ bool QuadPlane::verify_vtol_takeoff(const AP_Mission::Mission_Command &cmd)
         return false;
     }
 
-    if (is_positive(maximum_takeoff_airspeed) && (plane.airspeed.get_airspeed() > maximum_takeoff_airspeed)) {
+    if (is_positive(maximum_takeoff_airspeed) 
+#if AP_AIRSPEED_ENABLED    
+    && (plane.airspeed.get_airspeed() > maximum_takeoff_airspeed)
+#endif
+    ) {
         gcs().send_text(MAV_SEVERITY_CRITICAL, "Failed to complete takeoff, excessive wind");
         plane.set_mode(plane.mode_qland, ModeReason::VTOL_FAILED_TAKEOFF);
         return false;

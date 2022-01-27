@@ -356,13 +356,13 @@ void Plane::compass_save()
         compass.save_offsets();
     }
 }
-
 #if AP_AIRSPEED_AUTOCAL_ENABLE
 /*
   once a second update the airspeed calibration ratio
  */
 void Plane::airspeed_ratio_update(void)
 {
+#if AP_AIRSPEED_ENABLED
     if (!airspeed.enabled() ||
         gps.status() < AP_GPS::GPS_OK_FIX_3D ||
         gps.ground_speed() < 4) {
@@ -385,9 +385,9 @@ void Plane::airspeed_ratio_update(void)
     }
     const Vector3f &vg = gps.velocity();
     airspeed.update_calibration(vg, aparm.airspeed_max);
+#endif // AP_AIRSPEED_ENABLED
 }
 #endif // AP_AIRSPEED_AUTOCAL_ENABLE
-
 /*
   read the GPS and update position
  */

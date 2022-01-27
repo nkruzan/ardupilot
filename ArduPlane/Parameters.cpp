@@ -1489,14 +1489,15 @@ void Plane::load_parameters(void)
     }
 #endif
 
-    // PARAMETER_CONVERSION - Added: Jan-2022
+#if AP_AIRSPEED_ENABLED
+     // PARAMETER_CONVERSION - Added: Jan-2022
     {
         const uint16_t old_key = g.k_param_airspeed;
         const uint16_t old_index = 0;       // Old parameter index in the tree
         const uint16_t old_top_element = 0; // Old group element in the tree for the first subgroup element (see AP_PARAM_KEY_DUMP)
         AP_Param::convert_class(old_key, &airspeed, airspeed.var_info, old_index, old_top_element, true);
     }
-
+#endif
     hal.console->printf("load_all took %uus\n", (unsigned)(micros() - before));
 }
 

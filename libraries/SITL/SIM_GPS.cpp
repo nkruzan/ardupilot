@@ -16,7 +16,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include <SITL/SITL.h>
 #include <AP_Common/NMEA.h>
-
+#include <time.h>
 // simulated CAN GPS devices get fed from our SITL estimates:
 #if HAL_SIM_GPS_EXTERNAL_FIFO_ENABLED
 #include <sys/types.h>

@@ -493,7 +493,7 @@ const AP_Param::GroupInfo SIM::var_ins[] = {
     // @DisplayName: JSON master instance
     // @Description: the instance number to  take servos from
     AP_GROUPINFO("JSON_MASTER",     27, SIM, ride_along_master, 0),
-
+#if TCAL_ENABLED
     // the IMUT parameters must be last due to the enable parameters
     AP_SUBGROUPINFO(imu_tcal[0], "IMUT1_", 61, SIM, AP_InertialSensor::TCal),
 #if INS_MAX_INSTANCES > 1
@@ -502,6 +502,7 @@ const AP_Param::GroupInfo SIM::var_ins[] = {
 #if INS_MAX_INSTANCES > 2
     AP_SUBGROUPINFO(imu_tcal[2], "IMUT3_", 63, SIM, AP_InertialSensor::TCal),
 #endif
+#endif //TCAL_ENABLED
     AP_GROUPEND
 };
     

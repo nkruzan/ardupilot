@@ -318,6 +318,7 @@ bool RC_Channel_Plane::do_aux_function(const aux_func_t ch_option, const AuxSwit
 #endif
 
 case AUX_FUNC::ARSPD_CALIBRATE:
+#if AP_AIRSPEED_ENABLED 
 #if AP_AIRSPEED_AUTOCAL_ENABLE
        switch (ch_flag) {
         case AuxSwitchPos::HIGH:
@@ -330,6 +331,7 @@ case AUX_FUNC::ARSPD_CALIBRATE:
             break;
         }
 #endif
+#endif //AP_AIRSPEED_ENABLED
         break;
 
    case AUX_FUNC::LANDING_FLARE:

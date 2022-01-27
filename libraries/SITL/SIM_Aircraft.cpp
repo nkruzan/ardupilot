@@ -1029,7 +1029,8 @@ void Aircraft::add_shove_forces(Vector3f &rot_accel, Vector3f &body_accel)
 
 float Aircraft::get_local_updraft(const Vector3d &currentPos)
 {
-    int scenario = sitl->thermal_scenario;
+    //int scenario = sitl->thermal_scenario;
+    int scenario = 1 ;
 
     #define MAX_THERMALS 10
 
