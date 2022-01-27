@@ -70,7 +70,9 @@ void AP_InertialSensor_SITL::generate_accel()
     Vector3f accel_accum;
     uint8_t nsamples = enable_fast_sampling(accel_instance) ? 4 : 1;
 
+#if TCAL_ENABLED
     float T = get_temperature();
+#endif
 
     for (uint8_t j = 0; j < nsamples; j++) {
 
@@ -172,9 +174,9 @@ void AP_InertialSensor_SITL::generate_accel()
         if (fabsf(sitl->accel_fail[accel_instance]) > 1.0e-6f) {
             accel.x = accel.y = accel.z = sitl->accel_fail[accel_instance];
         }
-
+#if TCAL_ENABLED
         sitl->imu_tcal[gyro_instance].sitl_apply_accel(T, accel);
-
+#endif
         _notify_new_accel_sensor_rate_sample(accel_instance, accel);
 
         accel_accum += accel;
@@ -256,7 +258,9 @@ void AP_InertialSensor_SITL::generate_gyro()
 
         Vector3f gyro = Vector3f(p, q, r);
 
+#if TCAL_ENABLED
         sitl->imu_tcal[gyro_instance].sitl_apply_gyro(get_temperature(), gyro);
+#endif
 
         // add in gyro scaling
         Vector3f scale = sitl->gyro_scale[gyro_instance];

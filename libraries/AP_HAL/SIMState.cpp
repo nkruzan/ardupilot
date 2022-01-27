@@ -159,9 +159,11 @@ void SIMState::fdm_input_local(void)
     //     frsky_sportpassthrough->update();
     // }
 
+#if AP_SIM_CRSF_ENABLED
     if (crsf != nullptr) {
         crsf->update();
     }
+#endif
 
 #if HAL_SIM_PS_RPLIDARA2_ENABLED
     if (rplidara2 != nullptr) {
