@@ -47,7 +47,7 @@
 //#define HAL_INS_ICM20XXX_I2C_ADDR (0x68)
 
 // BARO choices:
-#define HAL_BARO_DEFAULT HAL_BARO_BMP280_SPI
+#define HAL_BARO_DEFAULT HAL_BARO_BMP280_I2C
 #define HAL_BARO_BMP280_NAME "BMP280"
 // or one of these:
 //#define HAL_BARO_DEFAULT HAL_BARO_MS5837_I2C
@@ -67,7 +67,7 @@
 // MAG/COMPASS probing:
 //#define HAL_MAG_PROBE_LIST ADD_BACKEND(DRIVER_ICM20948, AP_Compass_AK09916::probe_ICM20948_I2C(0, ROTATION_NONE));
 // BARO probing:
-//#define HAL_BARO_PROBE_LIST PROBE_BARO_I2C(BMP280, 0, 0x77)
+#define HAL_BARO_PROBE_LIST PROBE_BARO_I2C(BMP280, 0, 0x77)
 
 // allow boot without a baro
 #define HAL_BARO_ALLOW_INIT_NO_BARO 1
@@ -115,7 +115,7 @@
 //#define HAL_INS_PROBE_LIST PROBE_IMU_SPI( Invensense, HAL_INS_MPU9250_NAME, ROTATION_ROLL_180)
 
 
-#define HAL_BARO_PROBE_LIST PROBE_BARO_SPI(BMP280, "bmp280")
+//#define HAL_BARO_PROBE_LIST PROBE_BARO_SPI(BMP280, "bmp280")
 
 // 2 use udp, 1 use tcp...  for udp,client needs to connect as UDPCL in missionplanner etc to 192.168.4.1 port 14550
 #define HAL_ESP32_WIFI 1
@@ -149,8 +149,7 @@
 
 // SPI per-device setup, including speeds, etc.
 #define HAL_ESP32_SPI_DEVICES \
-    {.name= "bmp280", .bus=0, .device=0, .cs=GPIO_NUM_26, .mode = 3, .lspeed=1*MHZ, .hspeed=1*MHZ}, \
-    {.name="mpu9250", .bus=0, .device=1, .cs=GPIO_NUM_34,  .mode = 0, .lspeed=2*MHZ, .hspeed=8*MHZ}
+    {.name="mpu9250", .bus=0, .device=0, .cs=GPIO_NUM_34,  .mode = 0, .lspeed=2*MHZ, .hspeed=8*MHZ}
 //#define HAL_ESP32_SPI_DEVICES {}
 
 //I2C bus list
@@ -165,7 +164,8 @@
 
 //HARDWARE UARTS
 #define HAL_ESP32_UART_DEVICES \
-  {.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 },{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17 }
+  {}
+  //{.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 },{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17 }
 
 #define HAVE_FILESYSTEM_SUPPORT 1
 
