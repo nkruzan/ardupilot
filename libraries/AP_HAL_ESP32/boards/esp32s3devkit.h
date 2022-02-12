@@ -55,7 +55,7 @@
 //#define HAL_BARO_ANALOG_PIN (6)
 
 // MAG/COMPASS choices:
-//#define HAL_COMPASS_DEFAULT HAL_COMPASS_AK8963_MPU9250
+#define HAL_COMPASS_DEFAULT HAL_COMPASS_AK8963_MPU9250
 // or others:
 //#define HAL_COMPASS_ICM20948_I2C_ADDR (0x68)
 //#define HAL_COMPASS_AK09916_I2C_BUS 0
@@ -66,6 +66,7 @@
 //#define HAL_INS_PROBE_LIST PROBE_IMU_I2C(Invensensev2, 0, 0x68, ROTATION_YAW_270)
 // MAG/COMPASS probing:
 //#define HAL_MAG_PROBE_LIST ADD_BACKEND(DRIVER_ICM20948, AP_Compass_AK09916::probe_ICM20948_I2C(0, ROTATION_NONE));
+#define HAL_MAG_PROBE_LIST PROBE_MAG_SPI(Invensense, "mpu9250")
 // BARO probing:
 #define HAL_BARO_PROBE_LIST PROBE_BARO_I2C(BMP280, 0, 0x77)
 
@@ -97,10 +98,7 @@
 //#define HAL_ESP32_ADC_PINS HAL_ESP32_ADC_PINS_OPTION1
 #define HAL_ESP32_ADC_PINS HAL_ESP32_ADC_PINS_OPTION1
 
-
-
 #define HAL_PROBE_EXTERNAL_I2C_COMPASSES 1
-
 
 #define HAL_INS_MPU9250_NAME "mpu9250"
 
@@ -143,7 +141,7 @@
 // SPI BUS setup, including gpio, dma, etc
 // note... we use 'vspi' for the bmp280 and mpu9250
 #define HAL_ESP32_SPI_BUSES \
-    {.host=SPI1_HOST, .dma_ch=1, .mosi=GPIO_NUM_37, .miso=GPIO_NUM_35, .sclk=GPIO_NUM_36}
+    {.host=SPI3_HOST, .dma_ch=SPI_DMA_CH_AUTO, .mosi=GPIO_NUM_37, .miso=GPIO_NUM_35, .sclk=GPIO_NUM_36}
 // tip:  VSPI_HOST  is an alternative name for esp's SPI3
 //#define HAL_ESP32_SPI_BUSES {}
 
@@ -159,13 +157,12 @@
 
 
 // rcin on what pin?
-#define HAL_ESP32_RCIN GPIO_NUM_4
+#define HAL_ESP32_RCIN GPIO_NUM_14
 
 
 //HARDWARE UARTS
 #define HAL_ESP32_UART_DEVICES \
-  {}
-  //{.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 },{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17 }
+  {.port=UART_NUM_0, .rx=GPIO_NUM_6, .tx=GPIO_NUM_7 },{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17 }
 
 #define HAVE_FILESYSTEM_SUPPORT 1
 
