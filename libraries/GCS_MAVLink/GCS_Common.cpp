@@ -3732,13 +3732,13 @@ void GCS_MAVLINK::handle_common_message(const mavlink_message_t &msg)
         handle_named_value(msg);
         break;
 
+#if HAL_CANMANAGER_ENABLED
     case MAVLINK_MSG_ID_CAN_FRAME:
     case MAVLINK_MSG_ID_CANFD_FRAME:
         handle_can_frame(msg);
         break;
 
     case MAVLINK_MSG_ID_CAN_FILTER_MODIFY:
-#if HAL_CANMANAGER_ENABLED
         AP::can().handle_can_filter_modify(msg);
 #endif
         break;
@@ -4602,10 +4602,11 @@ void GCS_MAVLINK::handle_command_long(const mavlink_message_t &msg)
 
     // special handling of messages that need the mavlink_message_t
     switch (packet.command) {
+#if HAL_CANMANAGER_ENABLED        
     case MAV_CMD_CAN_FORWARD:
         result = handle_can_forward(packet, msg);
         break;
-
+#endif
     default:
          result = handle_command_long_packet(packet);
          break;
