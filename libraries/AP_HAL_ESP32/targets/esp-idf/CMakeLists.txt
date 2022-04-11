@@ -64,6 +64,12 @@ IF(${ARDUPILOT_CMD} STREQUAL "antennatracker")
     target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libAntennaTracker_libs.a")
 ENDIF()
 
+IF(${ARDUPILOT_CMD} STREQUAL "blimp")
+    message("Building for blimp")
+    target_link_libraries(${elf_file} "${ARDUPILOT_BIN}/libblimp.a")
+    target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libBlimp_libs.a")
+ENDIF()
+
 add_custom_target(showinc ALL
         COMMAND echo -e
         "$<TARGET_PROPERTY:${elf_file},INCLUDE_DIRECTORIES>"
