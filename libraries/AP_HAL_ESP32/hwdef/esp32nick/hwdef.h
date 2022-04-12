@@ -63,7 +63,7 @@
 
 //-----WIFI-----
 
-#define HAL_ESP32_WIFI 1  // 2 use udp, 1 use tcp
+#define HAL_ESP32_WIFI 3  // 2 use udp, 1 use tcp
 #define WIFI_SSID "ardupilot123"
 #define WIFI_PWD "ardupilot123"
 

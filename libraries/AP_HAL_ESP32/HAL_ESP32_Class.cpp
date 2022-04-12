@@ -22,6 +22,7 @@
 #include "SPIDevice.h"
 #include "UARTDriver.h"
 #include "WiFiDriver.h"
+#include "WifiEspNowDriver.h"
 #include "WiFiUdpDriver.h"
 #include "RCInput.h"
 #include "RCOutput.h"
@@ -38,6 +39,8 @@ static ESP32::UARTDriver uartBDriver(1);
 static ESP32::WiFiDriver uartCDriver; //tcp, client should connect to 192.168.4.1 port 5760
 #elif HAL_ESP32_WIFI == 2
 static ESP32::WiFiUdpDriver uartCDriver; //udp
+#elif HAL_ESP32_WIFI == 3
+static ESP32::WifiEspNOWDriver uartCDriver; //esp-now
 #endif
 #else
 static Empty::UARTDriver uartCDriver;
