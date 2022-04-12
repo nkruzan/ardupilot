@@ -105,12 +105,12 @@ uint32_t WiFiEspNowDriver::txspace()
 int16_t WiFiEspNowDriver::read()
 {
     //    if (!_read_mutex.take_nonblocking()) {
-    //        return 0;
+            return 0;
     //    }
 
     //    uint8_t byte;
     //    if (!_readbuf.read_byte(&byte)) {
-    //        return -1;
+            return -1;
     //    }
 
     //    _read_mutex.give();
@@ -122,7 +122,7 @@ bool WiFiEspNowDriver::start_listen()
     //accept_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     //if (accept_socket < 0) {
     //    accept_socket = -1;
-    //   return false;
+       return false;
     //}
     //int opt;
     //setsockopt(accept_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -152,7 +152,7 @@ bool WiFiEspNowDriver::read_all()
 //        _readbuf.write(_buffer, count);
 //        _read_mutex.give();
 //    } else {
-//        return false;
+        return false;
 //    }
 //    _read_mutex.give();
 //    return true;
@@ -188,7 +188,7 @@ bool WiFiEspNowDriver::write_data()
 //            _writebuf.advance(count);
 //        } else {
 //            _write_mutex.give();
-//            return false;
+            return false;
 //        }
 //    }
 //    _write_mutex.give();
@@ -240,7 +240,7 @@ void wifi_init_softap(void)
 //
 //    printf("wifi_init_softap finished. SSID:%s password:%s",
 //             WIFI_SSID, WIFI_PWD);
-//}
+}
 
 void WiFiEspNowDriver::initialize_wifi()
 {
@@ -253,13 +253,13 @@ void WiFiEspNowDriver::initialize_wifi()
 
 size_t WiFiEspNowDriver::write(uint8_t c)
 {
-//    return write(&c,1);
+    return write(&c,1);
 }
 
 size_t WiFiEspNowDriver::write(const uint8_t *buffer, size_t size)
 {
 //    if (!_write_mutex.take_nonblocking()) {
-//        return 0;
+        return 0;
 //    }
 //    size_t ret = _writebuf.write(buffer, size);
 //    _write_mutex.give();
