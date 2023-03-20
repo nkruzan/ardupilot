@@ -30,8 +30,8 @@
 #define PROBE_MAG_IMU_I2C(driver, imudev, bus, addr, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(GET_I2C_DEVICE(bus,addr),##args))
 //------------------------------------
 
-#define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
-
+//#define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
+#define HAL_ESP32_BOARD_NAME "esp32-nick"
 //-----INS/IMU-----
 #define HAL_INS_DEFAULT HAL_INS_MPU9250_SPI
 #define HAL_INS_MPU9250_NAME "mpu9250"
@@ -90,6 +90,8 @@
 
 //-----RCIN-----
 #define HAL_ESP32_RCIN GPIO_NUM_4
+
+#define HAL_ESP32_RMT_RX_PIN_NUMBER 4
 
 //-----UARTS-----
 #define HAL_ESP32_UART_DEVICES \
