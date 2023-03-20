@@ -71,6 +71,9 @@ jobs:
           ./waf copter
           cp build/esp32buzz/esp-idf_build/ardupilot.bin ./ArduCopter.bin
           cp build/esp32buzz/esp-idf_build/ardupilot.elf ./ArduCopter.elf
+          ./waf rover
+          cp build/esp32buzz/esp-idf_build/ardupilot.bin ./ArduRover.bin
+          cp build/esp32buzz/esp-idf_build/ardupilot.elf ./ArduRover.elf
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
@@ -81,6 +84,8 @@ jobs:
               /home/runner/work/ardupilot/ardupilot/ArduPlane.elf
               /home/runner/work/ardupilot/ardupilot/ArduCopter.bin
               /home/runner/work/ardupilot/ardupilot/ArduCopter.elf
+              /home/runner/work/ardupilot/ardupilot/ArduRover.bin
+              /home/runner/work/ardupilot/ardupilot/ArduRover.elf
               /home/runner/work/ardupilot/ardupilot/build/esp32buzz/esp-idf_build/bootloader/bootloader.bin
               /home/runner/work/ardupilot/ardupilot/build/esp32buzz/esp-idf_build/partition_table/partition-table.bin
 
