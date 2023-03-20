@@ -582,15 +582,8 @@ bool AP_InertialSensor_Invensense::_accumulate(uint8_t *samples, uint8_t n_sampl
 
         int16_t t2 = int16_val(data, 3);
         if (!_check_raw_temp(t2)) {
-            if (_enable_fast_fifo_reset) {
-                _fast_fifo_reset();
-                return false;
-            } else {
-                if (!hal.scheduler->in_expected_delay()) {
-                    debug("temp reset IMU[%u] %d %d", _accel_instance, _raw_temp, t2);
-                }
-                _fifo_reset(true);
-                return false;
+            if (!hal.scheduler->in_expected_delay()) {
+               // debug("temp reset IMU[%u] %d %d", _accel_instance, _raw_temp, t2);
             }
         }
         float temp = t2 * temp_sensitivity + temp_zero;
@@ -632,15 +625,8 @@ bool AP_InertialSensor_Invensense::_accumulate_sensor_rate_sampling(uint8_t *sam
         // use temperature to detect FIFO corruption
         int16_t t2 = int16_val(data, 3);
         if (!_check_raw_temp(t2)) {
-            if (_enable_fast_fifo_reset) {
-                _fast_fifo_reset();
-                ret = false;
-            } else {
-                if (!hal.scheduler->in_expected_delay()) {
-                    debug("temp reset IMU[%u] %d %d", _accel_instance, _raw_temp, t2);
-                }
-                _fifo_reset(true);
-                ret = false;
+            if (!hal.scheduler->in_expected_delay()) {
+                //debug("temp reset IMU[%u] %d %d", _accel_instance, _raw_temp, t2);
             }
             break;
         }
@@ -772,8 +758,8 @@ void AP_InertialSensor_Invensense::_read_fifo()
 
         if (_fast_sampling) {
             if (!_accumulate_sensor_rate_sampling(rx, n)) {
-                if (!hal.scheduler->in_expected_delay() && !_enable_fast_fifo_reset) {
-                    debug("IMU[%u] stop at %u of %u", _accel_instance, n_samples, bytes_read/MPU_SAMPLE_SIZE);
+                if (!hal.scheduler->in_expected_delay()) {
+                   // debug("IMU[%u] stop at %u of %u", _accel_instance, n_samples, bytes_read/MPU_SAMPLE_SIZE);
                 }
                 break;
             }
