@@ -3,7 +3,9 @@
   Andrew Tridgell September 2011
 */
 
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#if !defined(ALLOW_DOUBLE_MATH_FUNCTIONS)
+  #define ALLOW_DOUBLE_MATH_FUNCTIONS
+#endif
 
 #include <cmath>
 
