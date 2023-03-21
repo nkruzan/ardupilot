@@ -17,7 +17,9 @@
     SITL.cpp - software in the loop state
 */
 
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#if !defined(ALLOW_DOUBLE_MATH_FUNCTIONS)
+  #define ALLOW_DOUBLE_MATH_FUNCTIONS
+#endif
 
 #include "SITL.h"
 
