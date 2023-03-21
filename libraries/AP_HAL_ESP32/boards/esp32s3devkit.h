@@ -34,6 +34,10 @@
 #define RTC_WDT_STG_SEL_RESET_SYSTEM    3
 #define RTC_WDT_STG_SEL_RESET_RTC       4
 
+#define HAL_ESP32_BOARD_NAME "esp32s3devkit"
+
+#define HAL_ESP32_RMT_RX_PIN_NUMBER GPIO_NUM_14
+
 //#define CONFIG_HAL_BOARD 12
 //#define HAL_BOARD_ESP32 12
 
