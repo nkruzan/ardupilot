@@ -14,7 +14,9 @@
   suppport for LORD Microstrain CX5/GX5-45 serially connected AHRS Systems
  */
 
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#if !defined(ALLOW_DOUBLE_MATH_FUNCTIONS)
+  #define ALLOW_DOUBLE_MATH_FUNCTIONS
+#endif
 
 #include "AP_ExternalAHRS_LORD.h"
 #if HAL_EXTERNAL_AHRS_LORD_ENABLED
