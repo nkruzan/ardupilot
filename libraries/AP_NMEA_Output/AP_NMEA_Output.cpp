@@ -17,7 +17,9 @@
 
  */
 
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#if !defined(ALLOW_DOUBLE_MATH_FUNCTIONS)
+  #define ALLOW_DOUBLE_MATH_FUNCTIONS
+#endif
 
 #include "AP_NMEA_Output.h"
 
