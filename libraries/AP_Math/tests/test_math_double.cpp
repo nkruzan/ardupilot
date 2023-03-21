@@ -3,7 +3,9 @@
 // you're doing when directly comparing floats:
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-#define ALLOW_DOUBLE_MATH_FUNCTIONS
+#if !defined(ALLOW_DOUBLE_MATH_FUNCTIONS)
+  #define ALLOW_DOUBLE_MATH_FUNCTIONS
+#endif
 #include <AP_gtest.h>
 
 #include <AP_Math/AP_Math.h>
