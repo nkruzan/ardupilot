@@ -58,6 +58,11 @@ IF(${ARDUPILOT_CMD} STREQUAL "sub")
     target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libArduSub_libs.a")
 ENDIF()
 
+IF(${ARDUPILOT_CMD} STREQUAL "antennatracker")
+    message("Building AntennaTracker")
+    target_link_libraries(${elf_file} "${ARDUPILOT_BIN}/libantennatracker.a")
+    target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libAntennaTracker_libs.a")
+ENDIF()
 add_custom_target(showinc ALL
         COMMAND echo -e
         "$<TARGET_PROPERTY:${elf_file},INCLUDE_DIRECTORIES>"
