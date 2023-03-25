@@ -26,6 +26,10 @@
 #define TRUE						1
 #define FALSE						0
 
+#define PROBE_IMU_SPI(driver, devname, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname),##args))
+#define PROBE_MAG_IMU(driver, imudev, imu_instance, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(imu_instance,##args))
+#define PROBE_BARO_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_Baro_ ## driver::probe(*this,std::move(GET_I2C_DEVICE(bus, addr)),##args))
+
 //Protocols
 //list of protocols/enum:	ardupilot/libraries/AP_SerialManager/AP_SerialManager.h
 //default protocols:		ardupilot/libraries/AP_SerialManager/AP_SerialManager.cpp
@@ -37,16 +41,16 @@
 //#define HAL_SERIAL1_PROTOCOL				SerialProtocol_MAVLink2			//C	WiFi:  TCP, UDP, or disable (depends on HAL_ESP32_WIFI)
 //#define HAL_SERIAL1_BAUD				AP_SERIALMANAGER_MAVLINK_BAUD/1000	//57600
 
-#define HAL_SERIAL2_PROTOCOL				SerialProtocol_MAVLink2			//D	UART2: Always: MAVLink2 on ESP32
-//#define HAL_SERIAL2_BAUD				AP_SERIALMANAGER_MAVLINK_BAUD/1000	//57600
+//#define HAL_SERIAL2_PROTOCOL				SerialProtocol_GPS			//D	UART2: Always: MAVLink2 on ESP32
+//#define HAL_SERIAL2_BAUD				AP_SERIALMANAGER_GPS_BAUD/1000		//38400
 
-#define HAL_SERIAL3_PROTOCOL				SerialProtocol_GPS			//B	UART1: GPS1
+//#define HAL_SERIAL3_PROTOCOL				SerialProtocol_GPS			//B	UART1: GPS1
 //#define HAL_SERIAL4_BAUD				AP_SERIALMANAGER_GPS_BAUD/1000		//38400, Can not define default baudrate here (by config only)
 
-#define HAL_SERIAL4_PROTOCOL				SerialProtocol_None			//E
+//#define HAL_SERIAL4_PROTOCOL				SerialProtocol_None			//E
 //#define HAL_SERIAL4_BAUD				AP_SERIALMANAGER_GPS_BAUD/1000		//38400, Can not define default baudrate here (by config only)
 
-#define HAL_SERIAL5_PROTOCOL				SerialProtocol_None			//F
+/*#define HAL_SERIAL5_PROTOCOL				SerialProtocol_None			//F
 #define HAL_SERIAL5_BAUD				(115200/1000)
 
 #define HAL_SERIAL6_PROTOCOL				SerialProtocol_None			//G
@@ -59,33 +63,40 @@
 #define HAL_SERIAL8_BAUD				(115200/1000)
 
 #define HAL_SERIAL9_PROTOCOL				SerialProtocol_None			//J
-#define HAL_SERIAL9_BAUD				(115200/1000)
+#define HAL_SERIAL9_BAUD				(115200/1000)*/
 
 //Inertial sensors
-//#define HAL_INS_DEFAULT				HAL_INS_MPU9250_I2C
-//#define PROBE_IMU_I2C(driver, bus, addr, args ...)	ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
-//#define HAL_INS_PROBE_LIST				PROBE_IMU_I2C(Invensense, 0, 0x68, ROTATION_NONE)
+#define HAL_INS_DEFAULT                              	HAL_INS_MPU9250_SPI
+#define HAL_INS_PROBE_LIST 			     	PROBE_IMU_SPI(Invensense, HAL_INS_MPU9250_NAME, ROTATION_NONE)
+#define HAL_MAG_PROBE_LIST 			     	PROBE_MAG_IMU(AK8963, mpu9250, 0, ROTATION_NONE)
+#define HAL_INS_MPU9250_NAME 				"mpu9250"
+
+//Baro
+#define HAL_BARO_DEFAULT 				HAL_BARO_BMP280_I2C
+#define HAL_BARO_BMP085_NAME 				"bmp280"
+#define HAL_BARO_PROBE_LIST 				PROBE_BARO_I2C(BMP280, 0, 0x76)
 
 //I2C Buses
-#define HAL_ESP32_I2C_BUSES				{.port=I2C_NUM_0, .sda=GPIO_NUM_13, .scl=GPIO_NUM_14, .speed=400*KHZ, .internal=true, .soft=true}
+#define HAL_ESP32_I2C_BUSES				{.port=I2C_NUM_0, .sda=GPIO_NUM_21, .scl=GPIO_NUM_22, .speed=400*KHZ, .internal=true}
 
 //SPI Buses
-#define HAL_ESP32_SPI_BUSES				{}
+#define HAL_ESP32_SPI_BUSES				{.host=VSPI_HOST, .dma_ch=2, .mosi=GPIO_NUM_23, .miso=GPIO_NUM_19, .sclk=GPIO_NUM_18}
 
 //SPI Devices
-#define HAL_ESP32_SPI_DEVICES				{}
+#define HAL_ESP32_SPI_DEVICES				{.name="mpu9250", .bus=0, .device=0, .cs=GPIO_NUM_5, .mode = 0, .lspeed=2*MHZ, .hspeed=2*MHZ}
 
 //RCIN
 #define HAL_ESP32_RCIN					GPIO_NUM_36
 
 //RCOUT
-#define HAL_ESP32_RCOUT					{ GPIO_NUM_25, GPIO_NUM_27, GPIO_NUM_33, GPIO_NUM_32, GPIO_NUM_22, GPIO_NUM_21 }
+#define HAL_ESP32_RCOUT					{ GPIO_NUM_25, GPIO_NUM_27, GPIO_NUM_33, GPIO_NUM_32 }
+#define NUM_SERVO_CHANNELS				16
 
 //BAROMETER
 #define HAL_BARO_ALLOW_INIT_NO_BARO			1
 
 //COMPASS
-#define ALLOW_ARM_NO_COMPASS
+#define ALLOW_ARM_NO_COMPASS				1
 
 //WIFI
 #define HAL_ESP32_WIFI					1	//1-TCP, 2-UDP, comment this line = without wifi
@@ -93,10 +104,8 @@
 #define WIFI_PWD					"ardupilot-empty"
 
 //UARTs
-#define HAL_ESP32_UART_DEVICES \
-    {.port=UART_NUM_0, .rx=GPIO_NUM_3 , .tx=GPIO_NUM_1 },\
-    {.port=UART_NUM_1, .rx=GPIO_NUM_34, .tx=GPIO_NUM_18},\
-    {.port=UART_NUM_2, .rx=GPIO_NUM_35, .tx=GPIO_NUM_19}
+#define HAL_ESP32_UART_DEVICES 				{.port=UART_NUM_0, .rx=GPIO_NUM_3 , .tx=GPIO_NUM_1},\
+    							{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17}
 
 //ADC
 #define HAL_DISABLE_ADC_DRIVER				1
@@ -115,11 +124,12 @@
 
 //#define HAL_ESP32_SDCARD //after enabled, uncomment one of below
 //#define HAL_ESP32_SDMMC
-//#define HAL_ESP32_SDSPI				{.host=VSPI_HOST, .dma_ch=2, .mosi=GPIO_NUM_2, .miso=GPIO_NUM_15, .sclk=GPIO_NUM_26, .cs=GPIO_NUM_21}
+#define HAL_ESP32_SDCARD 				1
+#define HAL_ESP32_SDSPI 				{.host=HSPI_HOST, .dma_ch=1, .mosi=GPIO_NUM_13, .miso=GPIO_NUM_12, .sclk=GPIO_NUM_14, .cs=GPIO_NUM_15}
 
 #define HAL_OS_POSIX_IO					1
 
-#define HAL_LOGGING_FILESYSTEM_ENABLED			0
+#define HAL_LOGGING_FILESYSTEM_ENABLED			1
 #define HAL_LOGGING_DATAFLASH_ENABLED			0
 #define HAL_LOGGING_MAVLINK_ENABLED			0
 
@@ -129,4 +139,3 @@
 #define HAL_BOARD_TERRAIN_DIRECTORY			"/SDCARD/APM/TERRAIN"
 
 #define HAL_LOGGING_BACKENDS_DEFAULT			1
-
