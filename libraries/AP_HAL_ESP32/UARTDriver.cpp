@@ -137,8 +137,8 @@ ssize_t IRAM_ATTR UARTDriver::read(uint8_t *buffer, uint16_t count)
         return 0;
     }
 
-    _receive_timestamp[_receive_timestamp_idx^1] = AP_HAL::micros64();
-    _receive_timestamp_idx ^= 1;
+
+    _receive_timestamp_update();
 
     return ret;
 }
@@ -153,8 +153,7 @@ bool IRAM_ATTR UARTDriver::read(uint8_t &byte)
         return false;
     }
 
-    _receive_timestamp[_receive_timestamp_idx^1] = AP_HAL::micros64();
-    _receive_timestamp_idx ^= 1;
+    _receive_timestamp_update();
 
     return true;
 
@@ -223,7 +222,7 @@ bool UARTDriver::discard_input()
 }
 
 // record timestamp of new incoming data
-void IRAM_ATTR UARTDriver::receive_timestamp_update(void)
+void IRAM_ATTR UARTDriver::_receive_timestamp_update(void)
 {
     _receive_timestamp[_receive_timestamp_idx^1] = AP_HAL::micros64();
     _receive_timestamp_idx ^= 1;
