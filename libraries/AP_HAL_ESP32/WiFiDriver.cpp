@@ -285,6 +285,9 @@ void WiFiDriver::_wifi_thread(void *arg)
                 }
             }
         }
+        //hal.console->printf(" ZZZZ 11 \n" );
+        hal.scheduler->delay_microseconds(10);
+
     }
 }
 
