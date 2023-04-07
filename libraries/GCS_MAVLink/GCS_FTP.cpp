@@ -48,8 +48,11 @@ bool GCS_MAVLINK::ftp_init(void) {
         goto failed;
     }
 
+    #ifndef FTP_STACK_SIZE
+    #define FTP_STACK_SIZE 2560
+    #endif
     if (!hal.scheduler->thread_create(FUNCTOR_BIND_MEMBER(&GCS_MAVLINK::ftp_worker, void),
-                                      "FTP", 2560, AP_HAL::Scheduler::PRIORITY_IO, 0)) {
+                                      "FTP", FTP_STACK_SIZE, AP_HAL::Scheduler::PRIORITY_IO, 0)) {
         goto failed;
     }
     //hal.console->printf("\n2.FTP thread has ID %d and %d bytes free stack\n", 47, uxTaskGetStackHighWaterMark(NULL));
