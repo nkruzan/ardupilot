@@ -20,7 +20,6 @@
 #include <AP_HAL_ESP32/AP_HAL_ESP32.h>
 #include <AP_HAL_ESP32/Semaphores.h>
 
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
