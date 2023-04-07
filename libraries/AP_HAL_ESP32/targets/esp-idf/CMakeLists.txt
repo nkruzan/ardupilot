@@ -58,13 +58,19 @@ IF(${ARDUPILOT_CMD} STREQUAL "sub")
     target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libArduSub_libs.a")
 ENDIF()
 
+IF(${ARDUPILOT_CMD} STREQUAL "AP_Periph")
+    message("Building for AP_Periph")
+
+    target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/../bin/AP_Periph.a")
+ENDIF()
+
 IF(${ARDUPILOT_CMD} STREQUAL "antennatracker")
     message("Building AntennaTracker")
     target_link_libraries(${elf_file} "${ARDUPILOT_BIN}/libantennatracker.a")
     target_link_libraries(${elf_file} "${ARDUPILOT_LIB}/libAntennaTracker_libs.a")
 ENDIF()
 add_custom_target(showinc ALL
-        COMMAND echo -e
+        COMMAND echo 
         "$<TARGET_PROPERTY:${elf_file},INCLUDE_DIRECTORIES>"
         > includes.list
     VERBATIM
