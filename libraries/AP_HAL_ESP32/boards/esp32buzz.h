@@ -115,6 +115,8 @@
 
 //TERRAIN
 #define HAL_BOARD_TERRAIN_DIRECTORY "/SDCARD/APM/TERRAIN"
+// 2k not enuf
+#define HAL_LOGGING_STACK_SIZE 1024*3
 
 // see boards.py
 #ifndef ENABLE_HEAP
