@@ -79,8 +79,11 @@
 //-----SPIBUS-----
 #define HAL_ESP32_SPI_BUSES \
     {.host=VSPI_HOST, .dma_ch=1, .mosi=GPIO_NUM_23, .miso=GPIO_NUM_19, .sclk=GPIO_NUM_18}
+// tip:  VSPI_HOST  is an alternative name for esp's SPI3
 
 //-----SPIDEVICES-----
+// SPI per-device setup, including speeds, etc.
+// device=x must start from ZERO and increment.
 #define HAL_ESP32_SPI_DEVICES \
     {.name="mpu9250", .bus=0, .device=1, .cs=GPIO_NUM_5,  .mode = 0, .lspeed=2*MHZ, .hspeed=8*MHZ}
 
