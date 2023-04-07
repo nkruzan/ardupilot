@@ -22,6 +22,8 @@
 #include "lwip/sockets.h"
 #include "esp_event.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 class ESP32::WiFiUdpDriver : public AP_HAL::UARTDriver
 {
