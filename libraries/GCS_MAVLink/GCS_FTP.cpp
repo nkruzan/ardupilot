@@ -240,7 +240,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                 case FTP_OP::ListDirectory:
                     ftp_list_dir(request, reply);
                     break;
-                case FTP_OP::OpenFileRO:
+                case FTP_OP::OpenFileRO://4
                     {
                         // only allow one file to be open per session
                         if (ftp.fd != -1 && now - ftp.last_send_ms > FTP_SESSION_TIMEOUT) {
@@ -456,7 +456,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         reply.opcode = FTP_OP::Ack;
                         break;
                     }
-                case FTP_OP::CalcFileCRC32:
+                case FTP_OP::CalcFileCRC32://14
                     {
                         // sanity check that our the request looks well formed
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
@@ -497,7 +497,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         reply.opcode = FTP_OP::Ack;
                         break;
                     }
-                case FTP_OP::BurstReadFile:
+                case FTP_OP::BurstReadFile://15
                     {
                         const uint16_t max_read = (request.size == 0?sizeof(reply.data):request.size);
                         // must actually be working on a file
