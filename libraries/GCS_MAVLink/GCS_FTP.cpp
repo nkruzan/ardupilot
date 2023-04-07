@@ -52,6 +52,7 @@ bool GCS_MAVLINK::ftp_init(void) {
                                       "FTP", 2560, AP_HAL::Scheduler::PRIORITY_IO, 0)) {
         goto failed;
     }
+    //hal.console->printf("\n2.FTP thread has ID %d and %d bytes free stack\n", 47, uxTaskGetStackHighWaterMark(NULL));
 
     return true;
 
@@ -172,6 +173,7 @@ void GCS_MAVLINK::ftp_worker(void) {
         if ((request.sysid == reply.sysid) && (request.compid = reply.compid) &&
             (request.session == reply.session) && (request.seq_number + 1 == reply.seq_number)) {
             ftp_push_replies(reply);
+            //hal.console->printf("ftp_push_replies\n");
             continue;
         }
 
@@ -187,6 +189,7 @@ void GCS_MAVLINK::ftp_worker(void) {
         // sanity check the request size
         if (request.size > sizeof(request.data)) {
             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+            //hal.console->printf("ftpInvalidDataSize\n");
             ftp_push_replies(reply);
             continue;
         }
@@ -198,11 +201,13 @@ void GCS_MAVLINK::ftp_worker(void) {
             (request.opcode == FTP_OP::TerminateSession || request.opcode == FTP_OP::ResetSessions)) {
             // terminating a different session, just ack
             reply.opcode = FTP_OP::Ack;
+            //hal.console->printf("ftpAck\n");
         } else if (ftp.fd != -1 && request.session != ftp.current_session &&
                    now - ftp.last_send_ms < FTP_SESSION_TIMEOUT) {
             // if we have an open file and the session isn't right
             // then reject. This prevents IO on the wrong file
             ftp_error(reply, FTP_ERROR::InvalidSession);
+            //hal.console->printf("ftpInvalidSession\n");
         } else {
             if (ftp.fd != -1 &&
                 request.session != ftp.current_session &&
@@ -213,8 +218,11 @@ void GCS_MAVLINK::ftp_worker(void) {
                 AP::FS().close(ftp.fd);
                 ftp.fd = -1;
                 ftp.current_session = -1;
+                //hal.console->printf("ftpsessioncleanup.\n");
             }
             // dispatch the command as needed
+
+            //hal.console->printf("ftp opcode:%d\n",(int)request.opcode);
             switch (request.opcode) {
                 case FTP_OP::None:
                     reply.opcode = FTP_OP::Ack;
@@ -245,6 +253,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         }
                         if (ftp.fd != -1) {
                             ftp_error(reply, FTP_ERROR::Fail);
+                            //hal.console->printf("ftpFail fd\n");
                             break;
                         }
 
@@ -252,6 +261,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
                         if ((file_name_len != request.size) || (request.size == 0)) {
                             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+                            //hal.console->printf("ftpInvalidDataSize\n");
                             break;
                         }
 
@@ -261,6 +271,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         struct stat st;
                         if (AP::FS().stat((char *)request.data, &st)) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno stat\n");
                             break;
                         }
                         const size_t file_size = st.st_size;
@@ -269,6 +280,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         ftp.fd = AP::FS().open((char *)request.data, 0);
                         if (ftp.fd == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno open\n");
                             break;
                         }
                         ftp.mode = FTP_FILE_MODE::Read;
@@ -289,18 +301,21 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // must actually be working on a file
                         if (ftp.fd == -1) {
                             ftp_error(reply, FTP_ERROR::FileNotFound);
+                            //hal.console->printf("ftpread FileNotFound\n");
                             break;
                         }
 
                         // must have the file in read mode
                         if ((ftp.mode != FTP_FILE_MODE::Read)) {
                             ftp_error(reply, FTP_ERROR::Fail);
+                            //hal.console->printf("ftpread Fail moderead\n");
                             break;
                         }
 
                         // seek to requested offset
                         if (AP::FS().lseek(ftp.fd, request.offset, SEEK_SET) == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpread FailErrno LSEEK\n");
                             break;
                         }
 
@@ -308,10 +323,12 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const ssize_t read_bytes = AP::FS().read(ftp.fd, reply.data, MIN(sizeof(reply.data),request.size));
                         if (read_bytes == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpread FailErrno read\n");
                             break;
                         }
                         if (read_bytes == 0) {
                             ftp_error(reply, FTP_ERROR::EndOfFile);
+                            //hal.console->printf("ftpread EndOfFile\n");
                             break;
                         }
 
@@ -331,6 +348,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // only allow one file to be open per session
                         if (ftp.fd != -1) {
                             ftp_error(reply, FTP_ERROR::Fail);
+                            //hal.console->printf("ftpfd-1 Fail\n");
                             break;
                         }
 
@@ -338,6 +356,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
                         if ((file_name_len != request.size) || (request.size == 0)) {
                             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+                            //hal.console->printf("ftpInvalidDataSize\n");
                             break;
                         }
 
@@ -348,6 +367,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                                                (request.opcode == FTP_OP::CreateFile) ? O_WRONLY|O_CREAT|O_TRUNC : O_WRONLY);
                         if (ftp.fd == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno createopen\n");
                             break;
                         }
                         ftp.mode = FTP_FILE_MODE::Write;
@@ -361,18 +381,21 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // must actually be working on a file
                         if (ftp.fd == -1) {
                             ftp_error(reply, FTP_ERROR::FileNotFound);
+                            //hal.console->printf("ftpFileNotFound write\n");
                             break;
                         }
 
                         // must have the file in write mode
                         if ((ftp.mode != FTP_FILE_MODE::Write)) {
                             ftp_error(reply, FTP_ERROR::Fail);
+                            //hal.console->printf("ftpFail write\n");
                             break;
                         }
 
                         // seek to requested offset
                         if (AP::FS().lseek(ftp.fd, request.offset, SEEK_SET) == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno write lseek\n");
                             break;
                         }
 
@@ -380,6 +403,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const ssize_t write_bytes = AP::FS().write(ftp.fd, request.data, request.size);
                         if (write_bytes == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno write 2\n");
                             break;
                         }
 
@@ -393,6 +417,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
                         if ((file_name_len != request.size) || (request.size == 0)) {
                             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+                            //hal.console->printf("ftpInvalidDataSize strnlen\n");
                             break;
                         }
 
@@ -401,6 +426,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // actually make the directory
                         if (AP::FS().mkdir((char *)request.data) == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno mkdir\n");
                             break;
                         }
 
@@ -414,6 +440,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
                         if ((file_name_len != request.size) || (request.size == 0)) {
                             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+                            //hal.console->printf("ftpInvalidDataSize rm\n");
                             break;
                         }
 
@@ -422,6 +449,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // remove the file/dir
                         if (AP::FS().unlink((char *)request.data) == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno rm\n");
                             break;
                         }
 
@@ -434,6 +462,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         const size_t file_name_len = strnlen((char *)request.data, sizeof(request.data));
                         if ((file_name_len != request.size) || (request.size == 0)) {
                             ftp_error(reply, FTP_ERROR::InvalidDataSize);
+                            //hal.console->printf("ftpInvalidDataSize strnlen crc\n");
                             break;
                         }
 
@@ -443,6 +472,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                         int fd = AP::FS().open((char *)request.data, O_RDONLY);
                         if (fd == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno open crc\n");
                             break;
                         }
 
@@ -452,6 +482,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                             read_size = AP::FS().read(fd, reply.data, sizeof(reply.data));
                             if (read_size == -1) {
                                 ftp_error(reply, FTP_ERROR::FailErrno);
+                                //hal.console->printf("ftpFailErrno read crc\n");
                                 break;
                             }
                             checksum = crc_crc32(checksum, reply.data, MIN((size_t)read_size, sizeof(reply.data)));
@@ -472,18 +503,21 @@ void GCS_MAVLINK::ftp_worker(void) {
                         // must actually be working on a file
                         if (ftp.fd == -1) {
                             ftp_error(reply, FTP_ERROR::FileNotFound);
+                            //hal.console->printf("ftpFileNotFound burst\n");
                             break;
                         }
 
                         // must have the file in read mode
                         if ((ftp.mode != FTP_FILE_MODE::Read)) {
                             ftp_error(reply, FTP_ERROR::Fail);
+                            //hal.console->printf("ftpfail burst\n");
                             break;
                         }
 
                         // seek to requested offset
                         if (AP::FS().lseek(ftp.fd, request.offset, SEEK_SET) == -1) {
                             ftp_error(reply, FTP_ERROR::FailErrno);
+                            //hal.console->printf("ftpFailErrno lseek burst\n");
                             break;
                         }
 
@@ -512,6 +546,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                             const ssize_t read_bytes = AP::FS().read(ftp.fd, reply.data, MIN(sizeof(reply.data), max_read));
                             if (read_bytes == -1) {
                                 ftp_error(reply, FTP_ERROR::FailErrno);
+                                //hal.console->printf("ftpFailErrno readburst\n");
                                 break;
                             }
 
@@ -522,6 +557,7 @@ void GCS_MAVLINK::ftp_worker(void) {
 
                             if (read_bytes == 0) {
                                 ftp_error(reply, FTP_ERROR::EndOfFile);
+                                //hal.console->printf("ftpEndOfFile burst\n");
                                 break;
                             }
 
@@ -576,6 +612,7 @@ void GCS_MAVLINK::ftp_worker(void) {
                     // this was bad data, just nack it
                     gcs().send_text(MAV_SEVERITY_DEBUG, "Unsupported FTP: %d", static_cast<int>(request.opcode));
                     ftp_error(reply, FTP_ERROR::Fail);
+                    //hal.console->printf("ftpFail default\n");
                     break;
             }
         }
@@ -628,6 +665,7 @@ void GCS_MAVLINK::ftp_list_dir(struct pending_ftp &request, struct pending_ftp &
     // sanity check that our the request looks well formed
     if ((directory_name_size != request.size) || (request.size == 0)) {
         ftp_error(response, FTP_ERROR::InvalidDataSize);
+        //hal.console->printf("ftpInvalidDataSize listdir\n");
         return;
     }
 
@@ -637,6 +675,7 @@ void GCS_MAVLINK::ftp_list_dir(struct pending_ftp &request, struct pending_ftp &
     auto *dir = AP::FS().opendir((char *)request.data);
     if (dir == nullptr) {
         ftp_error(response, FTP_ERROR::FailErrno);
+        //hal.console->printf("ftpFailErrno opendir\n");
         return;
     }
 
@@ -645,6 +684,7 @@ void GCS_MAVLINK::ftp_list_dir(struct pending_ftp &request, struct pending_ftp &
         const struct dirent *entry = AP::FS().readdir(dir);
         if(entry == nullptr) {
             ftp_error(response, FTP_ERROR::EndOfFile);
+            //hal.console->printf("ftpEndOfFile listdir\n");
             AP::FS().closedir(dir);
             return;
         }
@@ -682,6 +722,7 @@ void GCS_MAVLINK::ftp_list_dir(struct pending_ftp &request, struct pending_ftp &
 
     if (index == 0) {
         ftp_error(response, FTP_ERROR::EndOfFile);
+        //hal.console->printf("ftpEndOfFile listdir\n");
         AP::FS().closedir(dir);
         return;
     }
