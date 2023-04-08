@@ -576,6 +576,27 @@ def configure(cfg):
 
     _collect_autoconfig_files(cfg)
 
+
+def generate_dronecan_dsdlc(cfg):
+    dsdlc_gen_path = cfg.bldnode.make_node('modules/DroneCAN/libcanard/dsdlc_generated').abspath()
+    src = cfg.srcnode.ant_glob('modules/DroneCAN/DSDL/* libraries/AP_UAVCAN/dsdl/*', dir=True, src=False)
+    dsdlc_path = cfg.srcnode.make_node('modules/DroneCAN/dronecan_dsdlc/dronecan_dsdlc.py').abspath()
+    if not os.path.exists(dsdlc_path):
+        print("Please update submodules with: git submodule update --recursive --init")
+        sys.exit(1)
+    src = ' '.join([s.abspath() for s in src])
+    cmd = '{} {} -O {} {}'.format(cfg.env.get_flat('PYTHON'),
+                        dsdlc_path,
+                        dsdlc_gen_path,
+                        src)
+    print("Generating DSDLC for CANARD: " + cmd)
+    ret = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if ret.returncode != 0:
+        print('Failed to run: ', cmd)
+        print(ret.stdout.decode('utf-8'))
+        print(ret.stderr.decode('utf-8'))
+        raise RuntimeError('Failed to generate DSDL C bindings')
+
 def collect_dirs_to_recurse(bld, globs, **kw):
     dirs = []
     globs = Utils.to_list(globs)
