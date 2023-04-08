@@ -512,11 +512,10 @@ void IRAM_ATTR Scheduler::_main_thread(void *arg)
 #endif
     Scheduler *sched = (Scheduler *)arg;
     hal.serial(0)->begin(115200);
-    hal.serial(1)->begin(57600);
-    hal.serial(2)->begin(57600);
-    //hal.uartC->begin(921600);
+    hal.serial(1)->begin(57600); //tcp wifi driver
+    //hal.serial(2)->begin(57600);
+   // hal.serial(3)->begin(115200);
     hal.serial(3)->begin(115200);
-
 #ifndef HAL_DISABLE_ADC_DRIVER
     hal.analogin->init();
 #endif
