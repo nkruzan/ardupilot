@@ -60,13 +60,20 @@ using namespace ESP32;
    */
 const AnalogIn::pin_info AnalogIn::pin_config[] = HAL_ESP32_ADC_PINS;
 
+
+
 #define ADC_GRP1_NUM_CHANNELS   ARRAY_SIZE(AnalogIn::pin_config)
+
 
 
 #define DEFAULT_VREF    1100       //Use adc2_vref_to_gpio() to obtain a better estimate
 #define NO_OF_SAMPLES   256          //Multisampling
 
+
+
 static uint32_t buf_adc[10] = {0,0,0,0,0,0,0,0,0,0}; //esp32classic uses 0-7 , S3 uses 0-9 inclusive
+
+
 
 static const adc_atten_t atten = ADC_ATTEN_DB_11;
 
@@ -243,6 +250,7 @@ void AnalogSource::_add_value()
     } else {
         adc2_get_raw((adc2_channel_t)_pin, ADC_WIDTH_BIT_12, &value);
     }
+
 
     _latest_value = value;
     _sum_value += value;
