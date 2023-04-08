@@ -1,7 +1,8 @@
 #pragma once
 
 //generated header
-#include <esp32buzz.h>
+#include <hwdef.h>
+//#include <esp32buzz.h>
 
 #define HAL_BOARD_NAME "ESP32"
 #define HAL_CPU_CLASS HAL_CPU_CLASS_150
@@ -14,6 +15,8 @@
 
 #define O_CLOEXEC 0
 #define HAL_STORAGE_SIZE (16384)
+
+
 
 // allow for static semaphores
 #include <type_traits>
@@ -80,6 +83,9 @@
 // ....with stack checking enabled in FreRTOS and GDB connected, GDB reports:
 // 0x4037ba21 in panic_abort (details=0x3fccdbb1 "***ERROR*** A stack overflow in task log_io has been detected.")
 #define HAL_LOGGING_STACK_SIZE 1024*3
+
+// default of 2560 not enuf with debug/print statments and esp32 rtos
+#define FTP_STACK_SIZE 1024*3
 
 /* string names for well known SPI devices - stolen from ./chibios.h */
 #define HAL_BARO_MS5611_NAME "ms5611"

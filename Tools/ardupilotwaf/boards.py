@@ -500,6 +500,7 @@ class Board:
 
     def pre_build(self, bld):
         '''pre-build hook that gets called before dynamic sources'''
+        print("boards.py: pre_build ROMFS check..",bld.env.ROMFS_FILES)
         if bld.env.ROMFS_FILES:
             self.embed_ROMFS_files(bld)
 
@@ -831,16 +832,29 @@ class esp32(Board):
         env.DEFINES.update(
             CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
             AP_SIM_ENABLED = 0,
+            HAL_ENABLE_LIBUAVCAN_DRIVERS = 0
         )
 
         tt = self.name[5:] #leave off 'esp32' so we just get 'buzz','diy','icarus, etc
         
         # this makes sure we get the correct subtype
+        print('CONFIG_HAL_BOARD_SUBTYPE = HAL_BOARD_SUBTYPE_ESP32_%s' %  tt.upper() )
         env.DEFINES.update(
             ENABLE_HEAP = 0,
             CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_ESP32_%s' %  tt.upper() ,
             ALLOW_DOUBLE_MATH_FUNCTIONS = '1',
         )
+
+        if self.with_can:
+            cfg.define('HAL_NUM_CAN_IFACES', 1)
+            cfg.define('UAVCAN_EXCEPTIONS', 0)
+            cfg.define('UAVCAN_SUPPORT_CANFD', 0)
+
+        if cfg.env.AP_PERIPH:
+            #if cfg.env.HAL_CANFD_SUPPORTED:
+            #    env.DEFINES.update(CANARD_ENABLE_CANFD=1)
+            #else:
+            env.DEFINES.update(CANARD_ENABLE_TAO_OPTION=1)
 
         env.AP_LIBRARIES += [
             'AP_HAL_ESP32',
@@ -877,6 +891,17 @@ class esp32(Board):
         #if cfg.options.enable_profile:
         #    env.CXXFLAGS += ['-pg',
         #                     '-DENABLE_PROFILE=1']
+
+        defaults_file = 'libraries/AP_HAL_ESP32/hwdef/%s/defaults.parm' % self.name
+        if os.path.exists(defaults_file):
+            print("ESP32: USING CUSTOM BOARD DEFAULTS: ",defaults_file)
+            env.ROMFS_FILES += [('defaults.parm', defaults_file)]
+            env.DEFINES.update(
+                HAL_PARAM_DEFAULTS_PATH='"@ROMFS/defaults.parm"',
+            )
+        if len(env.ROMFS_FILES) > 0:
+            env.CXXFLAGS += ['-DHAL_HAVE_AP_ROMFS_EMBEDDED_H']
+
     def pre_build(self, bld):
         '''pre-build hook that gets called before dynamic sources'''
         from waflib.Context import load_tool
