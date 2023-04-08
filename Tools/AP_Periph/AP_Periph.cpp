@@ -50,6 +50,8 @@ void stm32_watchdog_pat() {}
 #endif
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+#include <esp_task_wdt.h>
+#include <AP_HAL_ESP32/AP_HAL_ESP32.h>
 void stm32_watchdog_init() {}
 void stm32_watchdog_pat() { esp_task_wdt_reset(); }   
 //Each subscribed task must periodically call esp_task_wdt_reset() to reset the TWDT
@@ -375,7 +377,7 @@ void AP_Periph_FW::update()
     if (now - last_led_ms > 1000) {
         last_led_ms = now;
 #ifdef HAL_GPIO_PIN_LED
-        if (!no_iface_finished_dna) {
+        if (has_any_iface_finished_dna >0) {
             palToggleLine(HAL_GPIO_PIN_LED);
         }
 #endif
