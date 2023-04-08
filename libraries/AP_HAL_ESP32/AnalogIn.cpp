@@ -302,22 +302,12 @@ void AnalogIn::_timer_tick()
         }
     }
 
-#if ESP32_ADC_MAVLINK_DEBUG
-    static uint8_t count;
-    if (AP_HAL::millis() > 5000 && count++ == 10) {
-        count = 0;
-        uint16_t adc[6] {};
-        uint8_t n = ADC_GRP1_NUM_CHANNELS;
-        if (n > 6) {
-            n = 6;
-        }
-        for (uint8_t i = 0; i < n; i++) {
-            adc[i] = buf_adc[i];
-        }
-        mavlink_msg_ap_adc_send(MAVLINK_COMM_0, adc[0], adc[1], adc[2], adc[3], adc[4],
-                                adc[5]);
+    static uint32_t prev = AP_HAL::millis();
+    if (AP_HAL::millis() - prev > 1000) {
+        //count = 0;
+        prev = AP_HAL::millis();
+        hal.console->printf(" adc smoothed: %d %d %d %d %d %d %d %d %d %d\n", buf_adc[0], buf_adc[1], buf_adc[2], buf_adc[3], buf_adc[4], buf_adc[5], buf_adc[6], buf_adc[7], buf_adc[8], buf_adc[9]);
     }
-#endif
 
 }
 
