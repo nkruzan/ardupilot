@@ -66,6 +66,8 @@ const AnalogIn::pin_info AnalogIn::pin_config[] = HAL_ESP32_ADC_PINS;
 #define DEFAULT_VREF    1100       //Use adc2_vref_to_gpio() to obtain a better estimate
 #define NO_OF_SAMPLES   256          //Multisampling
 
+static uint32_t buf_adc[10] = {0,0,0,0,0,0,0,0,0,0}; //esp32classic uses 0-7 , S3 uses 0-9 inclusive
+
 static const adc_atten_t atten = ADC_ATTEN_DB_11;
 
 //ardupin is the ardupilot assigned number, starting from 1-8(max)
@@ -250,6 +252,14 @@ void AnalogSource::_add_value()
         _sum_value /= 2;
         _sum_count /= 2;
     }
+
+    static int count=0;
+    if (count > 1000 ) {
+     hal.console->printf(" adc raw: value:%d gpio:%d\n", value,_gpio);
+     count=0;
+    }
+    count++;
+    buf_adc[_pin] = read_average();
 }
 
 static void check_efuse()
