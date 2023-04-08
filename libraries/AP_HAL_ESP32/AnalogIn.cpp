@@ -83,7 +83,7 @@ AnalogSource::AnalogSource(int16_t ardupin,int16_t pin,float scaler, float initi
     _sum_count(0),
     _sum_value(0)
 {
-    printf("AnalogIn: adding ardupin:%d-> which is adc1_offset:%d\n", _ardupin,_pin);
+    hal.console->printf("AnalogIn: adding ardupin:%d-> which is adc1_offset:%d\n", _ardupin,_pin);
 
     // init the pin now if possible, otherwise doo it later from set_pin
     if ( _ardupin != ANALOG_INPUT_NONE ) {
