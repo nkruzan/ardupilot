@@ -12,10 +12,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <AP_HAL/AP_HAL.h>
 
-#include "AP_HAL_ESP32/Scheduler.h"
-#include "AP_HAL_ESP32/RCInput.h"
-#include "AP_HAL_ESP32/AnalogIn.h"
+#include "AP_HAL_ESP32.h"
+
+#include "Scheduler.h"
+#include "RCInput.h"
+#include "AnalogIn.h"
 #include "AP_Math/AP_Math.h"
 #include "SdCard.h"
 #include "Profile.h"
@@ -28,8 +31,15 @@
 #include "esp_int_wdt.h"
 #include "esp_task_wdt.h"
 
-#include <AP_HAL/AP_HAL.h>
+//#include <AP_HAL/AP_HAL.h>
 #include <stdio.h>
+#include "Semaphores.h"
+
+#include "esp_wifi.h"
+#include "esp_event.h"
+
+#include "esp_log.h"
+
 
 //#define SCHEDULERDEBUG 1
 
@@ -65,7 +75,7 @@ void Scheduler::init()
     hal.console->printf("%s:%d running with CONFIG_FREERTOS_HZ=%d\n", __PRETTY_FUNCTION__, __LINE__,CONFIG_FREERTOS_HZ);
 
     // pin main thread to Core 0, and we'll also pin other heavy-tasks to core 1, like wifi-related.
-    if (xTaskCreatePinnedToCore(_main_thread, "APM_MAIN", Scheduler::MAIN_SS, this, Scheduler::MAIN_PRIO, &_main_task_handle,1) != pdPASS) {
+    if (xTaskCreatePinnedToCore(_main_thread, "APM_MAIN", Scheduler::MAIN_SS, this, Scheduler::MAIN_PRIO, &_main_task_handle,0) != pdPASS) {
     //if (xTaskCreate(_main_thread, "APM_MAIN", Scheduler::MAIN_SS, this, Scheduler::MAIN_PRIO, &_main_task_handle) != pdPASS) {
         hal.console->printf("FAILED to create task _main_thread\n");
     }
@@ -487,11 +497,12 @@ void Scheduler::_uart_thread(void *arg)
 
 #endif
     while (true) {
-        sched->delay_microseconds(1000);
-        for (uint8_t i=0; i<hal.num_serial; i++) {
-            hal.serial(i)->_timer_tick();
-        }
-        hal.console->_timer_tick();
+        sched->delay_microseconds(1000); // WARN, this is a 1millissec delay in the uart thtead.
+        hal.serial(0)->_timer_tick();
+        hal.serial(1)->_timer_tick();
+        hal.serial(2)->_timer_tick();
+        hal.serial(3)->_timer_tick();
+        //hal.console->_timer_tick();
     }
 }
 
