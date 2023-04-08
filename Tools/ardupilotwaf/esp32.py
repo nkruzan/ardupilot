@@ -95,9 +95,15 @@ def _generate_hwdef_h(env):
 def pre_build(bld):
     """Configure esp-idf as lib target"""
     load_env_vars(bld.env)
+
     if bld.env.HAL_NUM_CAN_IFACES:
         bld.get_board().with_can = True
+
+    bld.env.ROMFS_FILES = list(set(bld.env.ROMFS_FILES)) #dedupe
     print("esp32.py pre_build ROMFS_FILES?=",bld.env.ROMFS_FILES)
+    if bld.env.ROMFS_FILES:
+            romfs_src = [bld.bldnode.find_or_declare('ap_romfs_embedded.h')]
+
     lib_vars = OrderedDict()
     print("esp32.py pre_build ARDUPILOT_CMD=",bld.cmd)
     lib_vars['ARDUPILOT_CMD'] = bld.cmd
