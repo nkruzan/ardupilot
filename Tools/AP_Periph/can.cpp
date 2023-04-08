@@ -972,6 +972,8 @@ static void onTransferReceived(CanardInstance* ins,
         NVIC_SystemReset();
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
         HAL_SITL::actually_reboot();
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        hal.scheduler->reboot(false);
 #endif
         break;
 
@@ -1461,6 +1463,7 @@ static bool can_do_dna()
     } else {
         // hack to pretend we were assigned a DNA number after 10 secs:
         printf("...didn't get DNA ID, falling back to CAN node-id 42\n");
+        canardSetLocalNodeID(&ins.canard, 42);
     }
 
     dronecan.send_next_node_id_allocation_request_at_ms =
