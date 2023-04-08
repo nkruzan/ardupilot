@@ -19,11 +19,16 @@
 #include <AP_HAL/utility/RingBuffer.h>
 #include <AP_HAL_ESP32/AP_HAL_ESP32.h>
 #include <AP_HAL_ESP32/Semaphores.h>
-#include "lwip/sockets.h"
-#include "esp_event.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+#include "esp_wifi.h"
+#include "esp_event.h"
+
+#ifndef WIFI_MAX_CONNECTION
+#define WIFI_MAX_CONNECTION 5
+#endif
 
 class ESP32::WiFiUdpDriver : public AP_HAL::UARTDriver
 {
@@ -50,13 +55,18 @@ public:
         return 1000*1024;
     }
 
-
     bool discard_input() override;
+
 private:
     enum ConnectionState {
-        NOT_INITIALIZED,
-        INITIALIZED,
-        CONNECTED
+        NOT_INITIALIZED=0,
+        INITIALIZED=1,
+        READY_TO_CONNECT=2,
+        CONNECTING=3,
+        WAITING_FOR_IP=4,
+        CONNECTED=5,
+        DISCONNECTED=6,
+        ERROR=7
     };
     const size_t TX_BUF_SIZE = 1024;
     const size_t RX_BUF_SIZE = 1024;
@@ -76,4 +86,6 @@ private:
     bool start_listen();
     bool try_accept();
     static void _wifi_thread2(void* arg);
+    //unsigned short available_socket();
+
 };
