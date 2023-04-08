@@ -366,69 +366,69 @@ void CANIface::handleTxInterrupt(const uint64_t utc_usec)
 {
 
 
-#if CH_CFG_USE_EVENTS == TRUE
-    if (event_handle_ != nullptr) {
-        PERF_STATS(stats.num_events);
-        evt_src_.signalI(1 << self_index_);
-    }
-#endif
-    pollErrorFlagsFromISR();
+// #if CH_CFG_USE_EVENTS == TRUE
+//     if (event_handle_ != nullptr) {
+//         PERF_STATS(stats.num_events);
+//         evt_src_.signalI(1 << self_index_);
+//     }
+// #endif
+//     pollErrorFlagsFromISR();
 }
 
 void CANIface::handleRxInterrupt(uint8_t fifo_index, uint64_t timestamp_us)
 {
 
 
-    /*
-     * Read the frame contents
-     */
-    AP_HAL::CANFrame &frame = isr_rx_frame;
-    // const bxcan::RxMailboxType& rf = can_->RxMailbox[fifo_index];
+//     /*
+//      * Read the frame contents
+//      */
+//     AP_HAL::CANFrame &frame = isr_rx_frame;
+//     // const bxcan::RxMailboxType& rf = can_->RxMailbox[fifo_index];
 
-    // if ((rf.RIR & bxcan::RIR_IDE) == 0) {
-    //     frame.id = AP_HAL::CANFrame::MaskStdID & (rf.RIR >> 21);
-    // } else {
-    //     frame.id = AP_HAL::CANFrame::MaskExtID & (rf.RIR >> 3);
-    //     frame.id |= AP_HAL::CANFrame::FlagEFF;
-    // }
+//     // if ((rf.RIR & bxcan::RIR_IDE) == 0) {
+//     //     frame.id = AP_HAL::CANFrame::MaskStdID & (rf.RIR >> 21);
+//     // } else {
+//     //     frame.id = AP_HAL::CANFrame::MaskExtID & (rf.RIR >> 3);
+//     //     frame.id |= AP_HAL::CANFrame::FlagEFF;
+//     // }
 
-    // if ((rf.RIR & bxcan::RIR_RTR) != 0) {
-    //     frame.id |= AP_HAL::CANFrame::FlagRTR;
-    // }
+//     // if ((rf.RIR & bxcan::RIR_RTR) != 0) {
+//     //     frame.id |= AP_HAL::CANFrame::FlagRTR;
+//     // }
 
-    // frame.dlc = rf.RDTR & 15;
+//     // frame.dlc = rf.RDTR & 15;
 
-    // frame.data[0] = uint8_t(0xFF & (rf.RDLR >> 0));
-    // frame.data[1] = uint8_t(0xFF & (rf.RDLR >> 8));
-    // frame.data[2] = uint8_t(0xFF & (rf.RDLR >> 16));
-    // frame.data[3] = uint8_t(0xFF & (rf.RDLR >> 24));
-    // frame.data[4] = uint8_t(0xFF & (rf.RDHR >> 0));
-    // frame.data[5] = uint8_t(0xFF & (rf.RDHR >> 8));
-    // frame.data[6] = uint8_t(0xFF & (rf.RDHR >> 16));
-    // frame.data[7] = uint8_t(0xFF & (rf.RDHR >> 24));
+//     // frame.data[0] = uint8_t(0xFF & (rf.RDLR >> 0));
+//     // frame.data[1] = uint8_t(0xFF & (rf.RDLR >> 8));
+//     // frame.data[2] = uint8_t(0xFF & (rf.RDLR >> 16));
+//     // frame.data[3] = uint8_t(0xFF & (rf.RDLR >> 24));
+//     // frame.data[4] = uint8_t(0xFF & (rf.RDHR >> 0));
+//     // frame.data[5] = uint8_t(0xFF & (rf.RDHR >> 8));
+//     // frame.data[6] = uint8_t(0xFF & (rf.RDHR >> 16));
+//     // frame.data[7] = uint8_t(0xFF & (rf.RDHR >> 24));
 
-    /*
-     * Store with timeout into the FIFO buffer and signal update event
-     */
-    CanRxItem &rx_item = isr_rx_item;
-    rx_item.frame = frame;
-    rx_item.timestamp_us = timestamp_us;
-    rx_item.flags = 0;
-    if (rx_queue_.push(rx_item)) {
-       // PERF_STATS(stats.rx_received);
-    } else {
-       // PERF_STATS(stats.rx_overflow);
-    }
+//     /*
+//      * Store with timeout into the FIFO buffer and signal update event
+//      */
+//     CanRxItem &rx_item = isr_rx_item;
+//     rx_item.frame = frame;
+//     rx_item.timestamp_us = timestamp_us;
+//     rx_item.flags = 0;
+//     if (rx_queue_.push(rx_item)) {
+//        // PERF_STATS(stats.rx_received);
+//     } else {
+//        // PERF_STATS(stats.rx_overflow);
+//     }
 
-    had_activity_ = true;
+//     had_activity_ = true;
 
-#if CH_CFG_USE_EVENTS == TRUE
-    if (event_handle_ != nullptr) {
-        PERF_STATS(stats.num_events);
-        evt_src_.signalI(1 << self_index_);
-    }
-#endif
-    pollErrorFlagsFromISR();
+// #if CH_CFG_USE_EVENTS == TRUE
+//     if (event_handle_ != nullptr) {
+//         PERF_STATS(stats.num_events);
+//         evt_src_.signalI(1 << self_index_);
+//     }
+// #endif
+//     pollErrorFlagsFromISR();
 }
 
 void CANIface::pollErrorFlagsFromISR()
@@ -465,8 +465,8 @@ void CANIface::clear_rx()
 
 void CANIface::pollErrorFlags()
 {
-    CriticalSectionLocker cs_locker;
-    pollErrorFlagsFromISR();
+    // CriticalSectionLocker cs_locker;
+    // pollErrorFlagsFromISR();
 }
 
 bool CANIface::canAcceptNewTxFrame(const AP_HAL::CANFrame& frame) const
@@ -525,26 +525,26 @@ uint32_t CANIface::getErrorCount() const
 
 #endif // #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
 
-#if CH_CFG_USE_EVENTS == TRUE
-ChibiOS::EventSource CANIface::evt_src_;
-bool CANIface::set_event_handle(AP_HAL::EventHandle* handle)
-{
-    CriticalSectionLocker lock;
-    event_handle_ = handle;
-    event_handle_->set_source(&evt_src_);
-    return event_handle_->register_event(1 << self_index_);
-}
+// #if CH_CFG_USE_EVENTS == TRUE
+// ChibiOS::EventSource CANIface::evt_src_;
+// bool CANIface::set_event_handle(AP_HAL::EventHandle* handle)
+// {
+//     CriticalSectionLocker lock;
+//     event_handle_ = handle;
+//     event_handle_->set_source(&evt_src_);
+//     return event_handle_->register_event(1 << self_index_);
+// }
 
-#endif // #if CH_CFG_USE_EVENTS == TRUE
+// #endif // #if CH_CFG_USE_EVENTS == TRUE
 
 void CANIface::checkAvailable(bool& read, bool& write, const AP_HAL::CANFrame* pending_tx) const
 {
     write = false;
     read = !isRxBufferEmpty();
 
-    if (pending_tx != nullptr) {
+    //if (pending_tx != nullptr) {
         write = canAcceptNewTxFrame(*pending_tx);
-    }
+    //}
 }
 
 bool CANIface::select(bool &read, bool &write,
@@ -560,27 +560,27 @@ bool CANIface::select(bool &read, bool &write,
         return false;
     }
 
-    pollErrorFlags();
+    //pollErrorFlags();
 
     checkAvailable(read, write, pending_tx);          // Check if we already have some of the requested events
     if ((read && in_read) || (write && in_write)) {
         return true;
     }
 
-#if CH_CFG_USE_EVENTS == TRUE
-    // we don't support blocking select in AP_Periph and bootloader
-    while (time < blocking_deadline) {
-        if (event_handle_ == nullptr) {
-            break;
-        }
-        event_handle_->wait(blocking_deadline - time); // Block until timeout expires or any iface updates
-        checkAvailable(read, write, pending_tx);  // Check what we got
-        if ((read && in_read) || (write && in_write)) {
-            return true;
-        }
-        time = AP_HAL::micros64();
-    }
-#endif // #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
+// #if CH_CFG_USE_EVENTS == TRUE
+//     // we don't support blocking select in AP_Periph and bootloader
+//     while (time < blocking_deadline) {
+//         if (event_handle_ == nullptr) {
+//             break;
+//         }
+//         event_handle_->wait(blocking_deadline - time); // Block until timeout expires or any iface updates
+//         checkAvailable(read, write, pending_tx);  // Check what we got
+//         if ((read && in_read) || (write && in_write)) {
+//             return true;
+//         }
+//         time = AP_HAL::micros64();
+//     }
+// #endif // #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
     return true;
 }
 
