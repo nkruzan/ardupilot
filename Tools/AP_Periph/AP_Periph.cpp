@@ -359,7 +359,7 @@ void AP_Periph_FW::show_stack_free()
 #endif
 
 
-
+// this is the main 'periph' loop() function that is called repeatedly as-fast as the scheduler can.
 void AP_Periph_FW::update()
 {
 #if AP_STATS_ENABLED
