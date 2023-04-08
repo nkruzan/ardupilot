@@ -493,6 +493,7 @@ class Board:
 
     def pre_build(self, bld):
         '''pre-build hook that gets called before dynamic sources'''
+        print("boards.py: pre_build ROMFS check..",bld.env.ROMFS_FILES)
         if bld.env.ROMFS_FILES:
             self.embed_ROMFS_files(bld)
 
