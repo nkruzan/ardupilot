@@ -318,12 +318,12 @@ int16_t CANIface::receive(AP_HAL::CANFrame& out_frame, uint64_t& out_timestamp_u
     memcpy(out_frame.data, message.data, 8);// copy new data
     out_frame.dlc = message.data_length_code;
     out_frame.id = message.identifier;
-        out_frame.id = out_frame.id | CANARD_CAN_FRAME_EFF;
+    out_frame.id = out_frame.id | CANARD_CAN_FRAME_EFF;
     // we don't pas CAN eror frames to libcanard, as it jsut rebuffs them anywway with CANARD_ERROR_RX_INCOMPATIBLE_PACKET*
     if (out_frame.id & AP_HAL::CANFrame::FlagERR) { // same as a message.isErrorFrame() if done later.
         return -1;
     }
-    //CANARD_CAN_FRAME_EFF
+    out_timestamp_us = AP_HAL::native_micros64(); // arrival time.
 
     return 1;// comment this out to see or not, the below print statements and data bytes etc
 
@@ -508,6 +508,25 @@ bool CANIface::isRxBufferEmpty() const
 {
     // CriticalSectionLocker lock;
     // return rx_queue_.available() == 0;
+
+    #include "driver/twai.h"
+
+    // //Reconfigure alerts to detect rx-related stuff only...
+    // uint32_t alerts_to_enable = TWAI_ALERT_RX_DATA | TWAI_ALERT_RX_QUEUE_FULL;
+    // if (twai_reconfigure_alerts(alerts_to_enable, NULL) == ESP_OK) {
+    //     printf("Alerts reconfigured\n");
+    // } else {
+    //     printf("Failed to reconfigure alerts");
+    // }
+
+    //to Block indefinitely until an alert occurs portMAX_DELAY, otherwisse non-blocking use tiny value like 1
+    uint32_t alerts_triggered;
+    twai_read_alerts(&alerts_triggered, 1);
+
+  //because we only alert on RX data, and non-zero value meansthere's RX available 
+    if ( alerts_triggered > 0) return false;
+
+    return true;
 }
 
 #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
@@ -596,6 +615,14 @@ void CANIface::initOnce(bool enable_irq)
     {
         printf("Failed to install CAN/TWAI driver\n");
         return;
+    }
+
+    //Reconfigure alerts to detect rx-related stuff only...
+    uint32_t alerts_to_enable = TWAI_ALERT_RX_DATA | TWAI_ALERT_RX_QUEUE_FULL;
+    if (twai_reconfigure_alerts(alerts_to_enable, NULL) == ESP_OK) {
+        printf("CAN/TWAI Alerts reconfigured\n");
+    } else {
+        printf("Failed to reconfigure CAN/TWAI alerts");
     }
     
      //Start TWAI driver
