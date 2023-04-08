@@ -270,8 +270,6 @@ int16_t CANIface::send(const AP_HAL::CANFrame& frame, uint64_t tx_deadline,
         return -1;
     }
 
-    //printf("CANIface send?\n");
-
     //esp32:
     twai_message_t message;
     message.identifier = frame.id;//buff->id;
@@ -288,26 +286,16 @@ int16_t CANIface::send(const AP_HAL::CANFrame& frame, uint64_t tx_deadline,
     }
     printf("CAN send fail\n");
     return -1;
-    //end esp32//
 
-    //CriticalSectionLocker lock;
-
-   //....todo
-    // return 1;
 }
 
 int16_t CANIface::receive(AP_HAL::CANFrame& out_frame, uint64_t& out_timestamp_us, CanIOFlags& out_flags)
 {
-            //printf("CANIface receive\n");
-
-    //CriticalSectionLocker lock;
-    //CanRxItem rx_item;
-   //....todo
-
-   //vTaskDelay(1000);
 
    #define MAX_RECV_MSGS_PER_SEC 200
 
+   // we don't use a CanRxItem like chibios does, we go from IDF's twai_message_t type to AP_HAL::CANFrame type
+ 
    //esp32:
     // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/twai.html#message-reception
     // https://github.com/espressif/esp-idf/blob/release/v4.4/components/driver/twai.c
@@ -330,12 +318,7 @@ int16_t CANIface::receive(AP_HAL::CANFrame& out_frame, uint64_t& out_timestamp_u
     memcpy(out_frame.data, message.data, 8);// copy new data
     out_frame.dlc = message.data_length_code;
     out_frame.id = message.identifier;
-    //if (message.extd) {
         out_frame.id = out_frame.id | CANARD_CAN_FRAME_EFF;
-    //}
-   // if (message.rtr) {
-    //    out_frame.id = out_frame.id | CANARD_CAN_FRAME_RTR;
-    //}
     // we don't pas CAN eror frames to libcanard, as it jsut rebuffs them anywway with CANARD_ERROR_RX_INCOMPATIBLE_PACKET*
     if (out_frame.id & AP_HAL::CANFrame::FlagERR) { // same as a message.isErrorFrame() if done later.
         return -1;
@@ -523,8 +506,8 @@ bool CANIface::canAcceptNewTxFrame(const AP_HAL::CANFrame& frame) const
 
 bool CANIface::isRxBufferEmpty() const
 {
-    CriticalSectionLocker lock;
-    return rx_queue_.available() == 0;
+    // CriticalSectionLocker lock;
+    // return rx_queue_.available() == 0;
 }
 
 #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
