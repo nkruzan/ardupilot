@@ -555,7 +555,7 @@ void IRAM_ATTR Scheduler::_main_thread(void *arg)
    // hal.serial(3)->begin(115200);
 hal.console->printf("\n%s:%d end of uarts\n", __PRETTY_FUNCTION__, __LINE__);
 #ifndef HAL_DISABLE_ADC_DRIVER
-    hal.analogin->init();
+   hal.analogin->init();
 #endif
     hal.rcout->init();
 
