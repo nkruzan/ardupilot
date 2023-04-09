@@ -14,8 +14,6 @@
  */
 #pragma once
 
-#define HAL_ESP32_BOARD_NAME "esp32-diy"
-
 // make sensor selection clearer
 #define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
 #define PROBE_IMU_SPI(driver, devname, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname),##args))
@@ -92,6 +90,8 @@
     {.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 },\
 	{.port=UART_NUM_1, .rx=GPIO_NUM_39, .tx=GPIO_NUM_33 },\
 	{.port=UART_NUM_2, .rx=GPIO_NUM_34, .tx=GPIO_NUM_25 }
+// the classic esp32 hardware has three uarts, and we also add a virtual tcp, and a virtual udp port to that list 
+#define HAL_UART_NUM_SERIAL_PORTS 5
 
 #define HAVE_FILESYSTEM_SUPPORT 1
 #define HAL_ESP32_SDCARD 1
@@ -113,4 +113,3 @@
 
 
 
-#define HAL_ESP32_RMT_RX_PIN_NUMBER 4
