@@ -81,7 +81,7 @@
 // ADC is available on lots of pints on the esp32, but adc2 cant co-exist with wifi we choose to allow ADC on :
 //#define HAL_DISABLE_ADC_DRIVER 1
 #define TRUE 1
-#define HAL_USE_ADC TRUE
+//#define HAL_USE_ADC TRUE
 
 // the pin number, the gain/multiplier associated with it, the ardupilot name for the pin in parameter/s.
 //

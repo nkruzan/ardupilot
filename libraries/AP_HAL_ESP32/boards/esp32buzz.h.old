@@ -45,7 +45,7 @@
 #define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
 //-----ADC-----
-#define HAL_USE_ADC TRUE
+//#define HAL_USE_ADC TRUE
 
 // 	pin number,
 //	gain/multiplier,

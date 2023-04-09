@@ -2198,7 +2198,7 @@ def write_ADC_config(f):
     if vdd[-1] == 'U':
         vdd = vdd[:-1]
     vdd = float(vdd) * 0.01
-    f.write('#define HAL_USE_ADC TRUE \n')
+    f.write('#define HAL_USE_ADC FALSE \n')
     f.write('#define HAL_ANALOG_PINS { \\\n')
     for (chan, scale, label, portpin) in adc_chans:
         scale_str = '%.2f/4096' % vdd
@@ -2882,7 +2882,7 @@ def add_apperiph_defaults(f):
 
 // enables ADC subsystem, to do the opposive, define HAL_DISABLE_ADC_DRIVER 1 instead
 #define TRUE 1
-#define HAL_USE_ADC TRUE
+#define HAL_USE_ADC FALSE
 
 #define HAL_ESP32_SDMMC 1
 #define HAVE_FILESYSTEM_SUPPORT 1
