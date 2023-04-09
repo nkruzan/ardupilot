@@ -103,7 +103,7 @@ static Empty::RCOutput rcoutDriver;
 #endif
 
 static ESP32::Scheduler schedulerInstance;
-//static ESP32::Util utilInstance;
+static ESP32::Util utilInstance;
 static Empty::OpticalFlow opticalFlowDriver;
 
 #if AP_SIM_ENABLED
@@ -163,7 +163,7 @@ HAL_ESP32::HAL_ESP32() :
         &rcinDriver,
         &rcoutDriver,
         &schedulerInstance,
-        nullptr,
+        &utilInstance,
         &opticalFlowDriver,
         &flashDriver,
         &dspDriver,
