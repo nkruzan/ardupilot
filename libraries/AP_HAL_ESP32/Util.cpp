@@ -22,6 +22,7 @@
 #include "RCOutput.h"
 
 #include <AP_ROMFS/AP_ROMFS.h>
+#include <AP_Common/ExpandingString.h>
 #include "SdCard.h"
 
 #include <esp_timer.h>
@@ -89,9 +90,9 @@ void Util::free_type(void *ptr, size_t size, AP_HAL::Util::Memory_Type mem_type)
 }
 
 
-#if ENABLE_HEAP
+#ifdef ENABLE_HEAP
 
-void *Util::allocate_heap_memory(size_t size)  
+void *Util::allocate_heap_memory(size_t size)
 {
     void *buf = calloc(1, size);
     if (buf == nullptr) {
@@ -107,19 +108,12 @@ void *Util::allocate_heap_memory(size_t size)
     return heap;
 }
 
-void *Util::heap_realloc(void *heap, void *ptr, size_t new_size) override
-{
-    if (heap == nullptr) {
-        return nullptr;
-    }
 
-    return multi_heap_realloc(*(multi_heap_handle_t *)heap, ptr, new_size);
-}
 
 /*
   realloc implementation thanks to wolfssl, used by AP_Scripting
  */
-void *Util::std_realloc(void *addr, size_t size) override
+void *Util::std_realloc(void *addr, size_t size)
 {
     if (size == 0) {
         free(addr);
@@ -135,6 +129,15 @@ void *Util::std_realloc(void *addr, size_t size) override
         free(addr);
     }
     return new_mem;
+}
+
+void *Util::heap_realloc(void *heap, void *ptr, size_t new_size)
+{
+    if (heap == nullptr) {
+        return nullptr;
+    }
+
+    return multi_heap_realloc(*(multi_heap_handle_t *)heap, ptr, new_size);
 }
 
 #endif // ENABLE_HEAP
@@ -198,13 +201,13 @@ uint64_t Util::get_hw_rtc() const
 #if defined(HAL_NO_GCS) || defined(HAL_BOOTLOADER_BUILD)
 #define Debug(fmt, args ...)  do { hal.console->printf(fmt, ## args); } while (0)
 #else
-#include <GCS_MAVLink/GCS.h>
+//#include <GCS_MAVLink/GCS.h>
 #define Debug(fmt, args ...)  do { gcs().send_text(MAV_SEVERITY_INFO, fmt, ## args); } while (0)
 #endif
 
 Util::FlashBootloader Util::flash_bootloader()
 {
-    //    ....esp32 too
+    //    ....esp32 to do 
     return FlashBootloader::FAIL;
 }
 #endif // !HAL_NO_FLASH_SUPPORT && !HAL_NO_ROMFS_SUPPORT
@@ -220,9 +223,9 @@ bool Util::get_system_id(char buf[40])
     char board_name[14] = "esp32-buzz   ";
 
     uint8_t base_mac_addr[6] = {0};
-    esp_err_t ret = esp_efuse_mac_get_custom(base_mac_addr);
+    esp_err_t ret = esp_efuse_mac_get_default(base_mac_addr);
     if (ret != ESP_OK) {
-        ret = esp_efuse_mac_get_default(base_mac_addr);
+        return false;
     }
 
     char board_mac[20] = "                   ";
@@ -242,16 +245,26 @@ bool Util::get_system_id(char buf[40])
 
 bool Util::get_system_id_unformatted(uint8_t buf[], uint8_t &len)
 {
-    len = MIN(12, len);
+    len = MIN(16, len);
 
+    static uint8_t cache[16];
 
-    uint8_t base_mac_addr[6] = {0};
-    esp_err_t ret = esp_efuse_mac_get_custom(base_mac_addr);
-    if (ret != ESP_OK) {
-        ret = esp_efuse_mac_get_default(base_mac_addr);
-    }
+    if (( cache[0] == 0 )&& (cache[1] == 0)) {
+        uint8_t base_mac_addr[6] = {0};
+        esp_err_t ret = esp_efuse_mac_get_default(base_mac_addr);
+        if (ret != ESP_OK) { printf("get_system_id_unformatted returned ERR"); return false; }
 
-    memcpy(buf, (const void *)base_mac_addr, len);
+        // mac address itself is only 6 bytes, so we copy it twice and allow the last 4 to be zero's
+        memcpy(cache, (const void *)base_mac_addr, len);
+        memcpy(cache+6, (const void *)base_mac_addr, len);
+        memset(cache+12,0,4);
+
+        printf("get_system_id_unformatted : %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d \n",
+                    cache[0],cache[1],cache[2] ,cache[3], cache[4], cache[5], cache[6], cache[7],
+                    cache[8],cache[9],cache[10],cache[11],cache[12],cache[13],cache[14],cache[15]);
+    } 
+    
+    memcpy(buf,cache,16);
 
     return true;
 }
@@ -268,27 +281,54 @@ bool Util::was_watchdog_reset() const
            || reason == ESP_RST_WDT;
 }
 
-#if CH_DBG_ENABLE_STACK_CHECK == TRUE
-/*
-  display stack usage as text buffer for @SYS/threads.txt
- */
-size_t Util::thread_info(char *buf, size_t bufsize)
-{
-    thread_t *tp;
-    size_t total = 0;
 
+// called by mavftp for thread info.
+ void Util::thread_info(ExpandingString &str)
+{
+  //todo
+}
+
+
+
+void Util::dma_info(ExpandingString &str)
+{
+  //todo 
+}
+
+void Util::mem_info(ExpandingString &str)
+{
+    //memory_heap_t *heaps;
+    //const struct memory_region *regions;
+    uint8_t num_heaps = 0;//malloc_get_heaps(&heaps, &regions); todo
+
+    str.printf("MemInfoV1\n");
+    for (uint8_t i=0; i<num_heaps; i++) {
+        size_t totalp=0, largest=0;
+        // get memory available on main heap
+        //chHeapStatus(i == 0 ? nullptr : &heaps[i], &totalp, &largest);
+        str.printf("START=0x%08x LEN=%3uk FREE=%6u LRG=%6u TYPE=%1u\n",
+                   unsigned(0), unsigned(0),
+                   unsigned(totalp), unsigned(largest), unsigned(0)); //todo
+    }
+}
+#if HAL_UART_STATS_ENABLED
+void Util::uart_info(ExpandingString &str)
+{
     // a header to allow for machine parsers to determine format
-    int n = snprintf(buf, bufsize, "ThreadsV1\n");
-    if (n <= 0) {
-        return 0;
+    str.printf("UARTV1\n");
+    for (uint8_t i = 0; i < HAL_UART_NUM_SERIAL_PORTS; i++) {
+        auto *uart = hal.serial(i);
+        if (uart) {
+            str.printf("SERIAL%u ", i);
+            uart->uart_info(str);
+        }
     }
 
-    //    char buffer[1024];
-    //    vTaskGetRunTimeStats(buffer);
-    //    snprintf(buf, bufsize,"\n\n%s\n", buffer);
-
-    // total = ..
-
-    return total;
 }
-#endif // CH_DBG_ENABLE_STACK_CHECK == TRUE
+#endif
+#if HAL_USE_PWM == TRUE
+void Util::timer_info(ExpandingString &str)
+{
+    hal.rcout->timer_info(str);
+}
+#endif
