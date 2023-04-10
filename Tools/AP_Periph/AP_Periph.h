@@ -17,7 +17,7 @@
 #include <AP_MSP/msp.h>
 #include <AP_TemperatureSensor/AP_TemperatureSensor.h>
 #include "../AP_Bootloader/app_comms.h"
-#include <AP_CheckFirmware/AP_CheckFirmware.h>
+//#include <AP_CheckFirmware/AP_CheckFirmware.h>
 #include "hwing_esc.h"
 #include <AP_CANManager/AP_CANManager.h>
 #include <AP_Scripting/AP_Scripting.h>
@@ -57,17 +57,28 @@
 
 #include "Parameters.h"
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
-void stm32_watchdog_init();
-void stm32_watchdog_pat();
-#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
-void stm32_watchdog_init();
-void stm32_watchdog_pat();
-#endif
-/*
-  app descriptor for firmware checking
- */
-extern const app_descriptor_t app_descriptor;
+#define AP_APP_DESCRIPTOR_SIGNATURE_UNSIGNED { 0x40, 0xa2, 0xe4, 0xf1, 0x64, 0x68, 0x91, 0x06 }
+
+struct app_descriptor_t {
+    uint8_t sig[8] = AP_APP_DESCRIPTOR_SIGNATURE_UNSIGNED;
+    // crc1 is the crc32 from firmware start to start of image_crc1
+    uint32_t image_crc1 = 0;
+    // crc2 is the crc32 from the start of version_major to the end of the firmware
+    uint32_t image_crc2 = 0;
+    // total size of firmware image in bytes
+    uint32_t image_size = 0;
+    uint32_t git_hash = 0;
+
+    // software version number
+    uint8_t  version_major = APP_FW_MAJOR;
+    uint8_t version_minor = APP_FW_MINOR;
+    // APJ_BOARD_ID (hardware version). This is also used in CAN NodeInfo
+    // with high byte in HardwareVersion.major and low byte in HardwareVersion.minor
+    uint16_t  board_id = APJ_BOARD_ID;
+    uint8_t reserved[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+};
+
+typedef struct app_descriptor_t app_descriptor;
 
 extern "C" {
 void can_printf(const char *fmt, ...) FMT_PRINTF(1,2);
