@@ -57,22 +57,28 @@ bool Compass::_start_calibration(uint8_t i, bool retry, float delay)
 
 #if COMPASS_MAX_INSTANCES > 1
     if (_priority_did_list[prio] != _priority_did_stored_list[prio]) {
+#if HAL_GCS_ENABLED
         gcs().send_text(MAV_SEVERITY_ERROR, "Compass cal requires reboot after priority change");
-        return false;
+#endif
+    return false;
     }
 #endif
     
     if (_calibrator[prio] == nullptr) {
         _calibrator[prio] = new CompassCalibrator();
         if (_calibrator[prio] == nullptr) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_ERROR, "Compass cal object not initialised");
+#endif
             return false;
         }
     }
 
     if (_options.get() & uint16_t(Option::CAL_REQUIRE_GPS)) {
         if (AP::gps().status() < AP_GPS::GPS_OK_FIX_2D) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_ERROR, "Compass cal requires GPS lock");
+#endif
             return false;
         }
     }
@@ -98,7 +104,9 @@ bool Compass::_start_calibration(uint8_t i, bool retry, float delay)
     if (!_cal_thread_started) {
         _cal_requires_reboot = true;
         if (!hal.scheduler->thread_create(FUNCTOR_BIND(this, &Compass::_update_calibration_trampoline, void), "compasscal", 2048, AP_HAL::Scheduler::PRIORITY_IO, 0)) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_CRITICAL, "CompassCalibrator: Cannot start compass thread.");
+#endif
             return false;
         }
         _cal_thread_started = true;
@@ -379,7 +387,9 @@ MAV_RESULT Compass::handle_mag_cal_command(const mavlink_command_long_t &packet)
     case MAV_CMD_DO_START_MAG_CAL: {
         result = MAV_RESULT_ACCEPTED;
         if (hal.util->get_soft_armed()) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_NOTICE, "Disarm to allow compass calibration");
+#endif
             result = MAV_RESULT_FAILED;
             break;
         }
@@ -508,7 +518,9 @@ MAV_RESULT Compass::mag_cal_fixed_yaw(float yaw_deg, uint8_t compass_mask,
         // get AHRS position. If unavailable then try GPS location
         if (!AP::ahrs().get_location(loc)) {
             if (AP::gps().status() < AP_GPS::GPS_OK_FIX_3D) {
+#if HAL_GCS_ENABLED
                 gcs().send_text(MAV_SEVERITY_ERROR, "Mag: no position available");
+#endif
                 return MAV_RESULT_FAILED;
             }
             loc = AP::gps().location();
@@ -522,7 +534,9 @@ MAV_RESULT Compass::mag_cal_fixed_yaw(float yaw_deg, uint8_t compass_mask,
     float declination;
     float inclination;
     if (!AP_Declination::get_mag_field_ef(lat_deg, lon_deg, intensity, declination, inclination)) {
+#if HAL_GCS_ENABLED
         gcs().send_text(MAV_SEVERITY_ERROR, "Mag: WMM table error");
+#endif
         return MAV_RESULT_FAILED;
     }
 
@@ -547,13 +561,17 @@ MAV_RESULT Compass::mag_cal_fixed_yaw(float yaw_deg, uint8_t compass_mask,
             continue;
         }
         if (!healthy(i)) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_ERROR, "Mag[%u]: unhealthy\n", i);
+#endif
             return MAV_RESULT_FAILED;
         }
 
         Vector3f measurement;
         if (!get_uncorrected_field(i, measurement)) {
+#if HAL_GCS_ENABLED
             gcs().send_text(MAV_SEVERITY_ERROR, "Mag[%u]: bad uncorrected field", i);
+#endif
             return MAV_RESULT_FAILED;
         }
 
