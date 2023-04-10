@@ -2879,6 +2879,12 @@ def add_apperiph_defaults(f):
 #ifndef HAL_GCS_ENABLED
 #define HAL_GCS_ENABLED 1
 #endif
+#ifndef AP_TEMPERATURE_SENSOR_ENABLED
+#define AP_TEMPERATURE_SENSOR_ENABLED 0
+#endif
+#ifndef AP_STATS_ENABLED
+#define AP_STATS_ENABLED 0
+#endif
 
 // enables ADC subsystem, to do the opposive, define HAL_DISABLE_ADC_DRIVER 1 instead
 #define TRUE 1
