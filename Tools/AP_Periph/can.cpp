@@ -209,49 +209,7 @@ static void readUniqueID(uint8_t* id)
 static void handle_get_node_info(CanardInstance* ins,
                                  CanardRxTransfer* transfer)
 {
-    uint8_t buffer[UAVCAN_PROTOCOL_GETNODEINFO_RESPONSE_MAX_SIZE] {};
-    uavcan_protocol_GetNodeInfoResponse pkt {};
-
-    node_status.uptime_sec = AP_HAL::native_millis() / 1000U;
-
-    pkt.status = node_status;
-    pkt.software_version.major = AP::fwversion().major;
-    pkt.software_version.minor = AP::fwversion().minor;
-    pkt.software_version.optional_field_flags = UAVCAN_PROTOCOL_SOFTWAREVERSION_OPTIONAL_FIELD_FLAG_VCS_COMMIT | UAVCAN_PROTOCOL_SOFTWAREVERSION_OPTIONAL_FIELD_FLAG_IMAGE_CRC;
-    pkt.software_version.vcs_commit = app_descriptor.git_hash;
-    uint32_t *crc = (uint32_t *)&pkt.software_version.image_crc;
-    crc[0] = app_descriptor.image_crc1;
-    crc[1] = app_descriptor.image_crc2;
-
-    readUniqueID(pkt.hardware_version.unique_id);
-
-    // use hw major/minor for APJ_BOARD_ID so we know what fw is
-    // compatible with this hardware
-    pkt.hardware_version.major = APJ_BOARD_ID >> 8;
-    pkt.hardware_version.minor = APJ_BOARD_ID & 0xFF;
-
-    if (periph.g.serial_number > 0) {
-        hal.util->snprintf((char*)pkt.name.data, sizeof(pkt.name.data), "%s(%u)", CAN_APP_NODE_NAME, (unsigned)periph.g.serial_number);
-    } else {
-        hal.util->snprintf((char*)pkt.name.data, sizeof(pkt.name.data), "%s", CAN_APP_NODE_NAME);
-    }
-    pkt.name.len = strnlen((char*)pkt.name.data, sizeof(pkt.name.data));
-
-    uint16_t total_size = uavcan_protocol_GetNodeInfoResponse_encode(&pkt, buffer, !periph.canfdout());
-
-    const int16_t resp_res = canardRequestOrRespond(ins,
-                                                    transfer->source_node_id,
-                                                    UAVCAN_PROTOCOL_GETNODEINFO_SIGNATURE,
-                                                    UAVCAN_PROTOCOL_GETNODEINFO_ID,
-                                                    &transfer->transfer_id,
-                                                    transfer->priority,
-                                                    CanardResponse,
-                                                    &buffer[0],
-                                                    total_size
-#if HAL_CANFD_SUPPORTED
-                                                    , periph.canfdout()
-#endif
-);
+    const int16_t resp_res = 0;
     if (resp_res <= 0) {
         printf("Could not respond to GetNodeInfo: %d\n", resp_res);
     }
