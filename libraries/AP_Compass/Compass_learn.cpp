@@ -15,7 +15,9 @@ extern const AP_HAL::HAL &hal;
 CompassLearn::CompassLearn(Compass &_compass) :
     compass(_compass)
 {
+#if HAL_GCS_ENABLED
     gcs().send_text(MAV_SEVERITY_INFO, "CompassLearn: Initialised");
+#endif
 }
 
 // accuracy threshold applied for GSF yaw estimate
@@ -64,7 +66,9 @@ void CompassLearn::update(void)
     if (result == MAV_RESULT_ACCEPTED) {
         AP_Notify::flags.compass_cal_running = false;
         compass.set_learn_type(Compass::LEARN_NONE, true);
+#if HAL_GCS_ENABLED
         gcs().send_text(MAV_SEVERITY_INFO, "CompassLearn: Finished");
+#endif
     }
 }
 
