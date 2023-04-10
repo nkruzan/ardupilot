@@ -30,10 +30,10 @@ def configure(cfg):
 
     #define env and location for the cmake esp32 file
     env = cfg.env
-    env.AP_HAL_ESP32 = srcpath('libraries/AP_HAL_ESP32/targets/esp-idf')
+    env.AP_HAL_ESP32 = srcpath('libraries/AP_HAL_ESP32/targets/esp-idf-s3')
     env.AP_PROGRAM_FEATURES += ['esp32_ap_program']
 
-    env.ESP_IDF_PREFIX_REL = 'esp-idf'
+    env.ESP_IDF_PREFIX_REL = 'esp-idf-s3'
 
     prefix_node = bldnode.make_node(env.ESP_IDF_PREFIX_REL)
 
@@ -110,9 +110,9 @@ def pre_build(bld):
     lib_vars['ARDUPILOT_LIB'] = bld.bldnode.find_or_declare('lib/').abspath()
     lib_vars['ARDUPILOT_BIN'] = bld.bldnode.find_or_declare('lib/bin').abspath()
     esp_idf = bld.cmake(
-            name='esp-idf',
+            name='esp-idf-s3',
             cmake_vars=lib_vars,
-            cmake_src='libraries/AP_HAL_ESP32/targets/esp-idf',
+            cmake_src='libraries/AP_HAL_ESP32/targets/esp-idf-s3',
             cmake_bld='esp-idf_build',
             )
 
@@ -158,7 +158,7 @@ class build_esp32_image_periph(Task.Task):
 @after_method('process_source')
 def esp32_firmware(self):
     self.link_task.always_run = True
-    esp_idf = self.bld.cmake('esp-idf')
+    esp_idf = self.bld.cmake('esp-idf-s3')
 
     build = esp_idf.build('all', target='esp-idf_build/ardupilot.bin')
     build.post()
