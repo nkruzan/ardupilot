@@ -170,13 +170,14 @@
 
 #define HAVE_FILESYSTEM_SUPPORT 1
 
+#define HAL_ESP32_SDCARD 1
+
 // Do u want to use mmc or spi mode for the sd card, this is board specific ,
 //  as mmc uses specific pins but is quicker,
 #define HAL_ESP32_SDMMC 1
-// and spi is more flexible pinouts....  dont forget vspi/hspi should be selected to NOT conflict with SPI_BUSES above
-//#define HAL_ESP32_SDSPI {.host=VSPI_HOST, .dma_ch=2, .mosi=GPIO_NUM_2, .miso=GPIO_NUM_15, .sclk=GPIO_NUM_14, .cs=GPIO_NUM_21}
+#define SOC_SDMMC_USE_GPIO_MATRIX 1
+#define HAL_ESP32_SDMMC_PINS {.clk=GPIO_NUM_41,.cmd=GPIO_NUM_40,.d0=GPIO_NUM_39}
 
-#define HAL_ESP32_SDCARD 1
 #define LOGGER_MAVLINK_SUPPORT 1
 #define HAL_BOARD_LOG_DIRECTORY "/SDCARD/APM/LOGS"
 #define HAL_BOARD_TERRAIN_DIRECTORY "/SDCARD/APM/TERRAIN"

@@ -87,6 +87,7 @@ done:
 }
 
 #ifdef HAL_ESP32_SDMMC
+ESP32::SDMMCPins sdmmc_pins_ = HAL_ESP32_SDMMC_PINS;
 
 void mount_sdcard_mmc()
 {
@@ -129,9 +130,9 @@ void mount_sdcard_mmc()
 
 #ifdef SOC_SDMMC_USE_GPIO_MATRIX
     sdmmc_slot_config_t slot_config = { \
-                                .clk = GPIO_NUM_14, \
-                                .cmd = GPIO_NUM_15, \
-                                .d0 = GPIO_NUM_2, \
+                                .clk = sdmmc_pins.clk, \
+                                .cmd = sdmmc_pins.cmd, \
+                                .d0 = sdmmc_pins.d0, \
                                 .d1 = GPIO_NUM_NC, \
                                 .d2 = GPIO_NUM_NC, \
                                 .d3 = GPIO_NUM_NC, \
@@ -144,15 +145,11 @@ void mount_sdcard_mmc()
                                 .width = 1, \
                                 .flags = 0\
                                 };
-
-    // To use 1-line SD mode (this driver does), uncomment the following line:
-    //slot_config.width = 1;
-
     // GPIOs 15, 2, 4, 12, 13 should have external 10k pull-ups.
     // Internal pull-ups are not sufficient. However, enabling internal pull-ups
     // does make a difference some boards, so we do that here.
-    gpio_set_pull_mode(slot_config.cmd, GPIO_PULLUP_ONLY);   // GPIO_NUM_15 CMD, needed in 4- and 1- line modes
-    gpio_set_pull_mode(slot_config.d0, GPIO_PULLUP_ONLY);    // GPIO_NUM_2 D0, needed in 4- and 1-line modes
+    gpio_set_pull_mode(sdmmc_pins_.cmd, GPIO_PULLUP_ONLY);   // CMD, needed in 4- and 1- line modes
+    gpio_set_pull_mode(sdmmc_pins_.d0, GPIO_PULLUP_ONLY);    // D0, needed in 4- and 1-line modes
     //gpio_set_pull_mode(GPIO_NUM_4, GPIO_PULLUP_ONLY);    // D1, needed in 4-line mode only
     //gpio_set_pull_mode(GPIO_NUM_12, GPIO_PULLUP_ONLY);   // D2, needed in 4-line mode only
     //

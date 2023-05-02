@@ -42,6 +42,12 @@ struct SPIDeviceDesc {
     uint32_t hspeed;
 };
 
+struct SDMMCPins {
+    gpio_num_t clk;
+    gpio_num_t cmd;
+    gpio_num_t d0;
+};
+
 struct SPIBusDesc {
     spi_host_device_t host;
     int dma_ch;
