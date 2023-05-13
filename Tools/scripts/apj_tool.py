@@ -32,6 +32,7 @@ class embedded_defaults(object):
         self.offset = 0
         self.max_len = 0
         self.extension = os.path.splitext(filename)[1]
+        self.is_archive = False
         if self.extension.lower() in ['.apj', '.px4']:
             self.load_apj()
         elif self.extension.lower() in ['.abin']:
@@ -67,9 +68,14 @@ class embedded_defaults(object):
         f = open(self.filename,'r')
         self.fw_json = json.load(f)
         f.close()
-        self.firmware = zlib.decompress(base64.b64decode(self.fw_json['image']))
+        if self.fw_json['magic'] == 'APJFWAv1':
+            #we are an archive
+            self.is_archive = True
+            self.firmware = base64.b64decode(self.fw_json['firmware'])
+        else:
+            self.firmware = zlib.decompress(base64.b64decode(self.fw_json['image']))
         print("Loaded apj file of length %u" % len(self.firmware))
-
+        
     def save_binary(self):
         '''save binary file'''
         f = open(self.filename, 'wb')
@@ -79,7 +85,10 @@ class embedded_defaults(object):
 
     def save_apj(self):
         '''save apj file'''
-        self.fw_json['image'] = to_ascii(base64.b64encode(zlib.compress(self.firmware, 9)))
+        if self.is_archive:
+            self.fw_json['firmware'] = to_ascii(base64.b64encode(self.firmware))
+        else:
+            self.fw_json['image'] = to_ascii(base64.b64encode(zlib.compress(self.firmware, 9)))
         f = open(self.filename,'w')
         json.dump(self.fw_json,f,indent=4)
         f.truncate()
