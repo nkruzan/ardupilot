@@ -179,7 +179,7 @@ bool Scheduler::thread_create(AP_HAL::MemberProc proc, const char *name, uint32_
     uint32_t actual_stack_size = requested_stack_size+EXTRA_THREAD_SPACE;
 
     tskTaskControlBlock* xhandle;
-    BaseType_t xReturned = xTaskCreate(thread_create_trampoline, name, stack_size, tproc, thread_priority, &xhandle);
+    BaseType_t xReturned = xTaskCreate(thread_create_trampoline, name, actual_stack_size, tproc, thread_priority, &xhandle);
     if (xReturned != pdPASS) {
         free(tproc);
         return false;
