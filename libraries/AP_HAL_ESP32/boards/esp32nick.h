@@ -16,9 +16,10 @@
 
 #define HAL_ESP32_BOARD_NAME "esp32-nick"
 // CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
-
 #define TRUE						1
 #define FALSE						0
+
+//#define AP_SIM_ENABLED TRUE
 
 // make sensor selection clearer
 #define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
