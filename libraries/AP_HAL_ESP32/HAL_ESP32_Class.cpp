@@ -21,14 +21,7 @@
 
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 
-#ifdef AP_SIM_ENABLED
-#if AP_SIM_ENABLED == 0
-    #undef AP_SIM_ENABLED
-    #define AP_SIM_ENABLED 1 
-#endif
-#else
-    #define AP_SIM_ENABLED 1 
-#endif
+#define AP_SIM_ENABLED 1 
 
 #include <AP_HAL/SIMState.h>
 
