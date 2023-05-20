@@ -826,12 +826,14 @@ class esp32(Board):
     abstract = True
     toolchain = 'xtensa-esp32-elf'
     def set_defines(self,env):
+   #     print('esp32.set_defines()')
         env.DEFINES.update(
             CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
             AP_SIM_ENABLED = 1,
         )
 
     def set_libraries(self,env):
+   #     print('esp32.set_libraries()')
         env.AP_LIBRARIES += [
             'AP_HAL_ESP32',
         ]
