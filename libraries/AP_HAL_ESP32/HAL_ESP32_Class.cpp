@@ -13,6 +13,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define AP_SIM_ENABLED 1 
 #include <AP_HAL/AP_HAL.h>
 #include "HAL_ESP32_Class.h"
 #include <AP_HAL_Empty/AP_HAL_Empty_Private.h>
@@ -21,7 +22,6 @@
 
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 
-#define AP_SIM_ENABLED 1 
 
 #include <AP_HAL/SIMState.h>
 
