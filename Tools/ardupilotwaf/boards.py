@@ -919,6 +919,7 @@ class esp32sim(esp32):
     abstract = True
     toolchain = 'xtensa-esp32-elf'
     def set_defines(self,env):
+        env.SIM_ENABLED = 1
         env.DEFINES.update(
             CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
             AP_SIM_ENABLED = 1,
