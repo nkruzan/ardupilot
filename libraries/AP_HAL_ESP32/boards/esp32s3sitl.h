@@ -30,7 +30,7 @@
 //Inertial sensors
 #define HAL_INS_DEFAULT				HAL_INS_NONE
 #define AP_INERTIALSENSOR_ENABLED 1
-
+#define AP_SIM_INS_ENABLED 1
 //I2C Buses
 #define HAL_ESP32_I2C_BUSES				{}
 
