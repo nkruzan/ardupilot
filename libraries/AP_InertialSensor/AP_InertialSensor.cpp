@@ -1252,7 +1252,10 @@ AP_InertialSensor::detect_backends(void)
         break;
     }
 #elif HAL_INS_DEFAULT == HAL_INS_NONE
-    // no INS device
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32 && AP_SIM_ENABLED
+// no real INS backends avail, lets use an empty substitute to boot ok and get to mavlink
+ADD_BACKEND(AP_InertialSensor_NONE::detect(*this, INS_NONE_SENSOR_A));
+#endif
 #else
     #error Unrecognised HAL_INS_TYPE setting
 #endif

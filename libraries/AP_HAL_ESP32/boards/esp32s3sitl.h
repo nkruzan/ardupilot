@@ -20,6 +20,22 @@
 #define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_S3SITL
 #define HAL_ESP32_BOARD_NAME "esp32s3sitl"
 
+// make sensor selection clearer
+#define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
+#define PROBE_IMU_SPI(driver, devname, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname),##args))
+#define PROBE_IMU_SPI2(driver, devname1, devname2, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname1),hal.spi->get_device(devname2),##args))
+
+#define PROBE_BARO_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_Baro_ ## driver::probe(*this,std::move(GET_I2C_DEVICE(bus, addr)),##args))
+#define PROBE_BARO_SPI(driver, devname, args ...) ADD_BACKEND(AP_Baro_ ## driver::probe(*this,std::move(hal.spi->get_device(devname)),##args))
+
+#define PROBE_MAG_I2C(driver, bus, addr, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe(GET_I2C_DEVICE(bus, addr),##args))
+#define PROBE_MAG_SPI(driver, devname, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe(hal.spi->get_device(devname),##args))
+#define PROBE_MAG_IMU(driver, imudev, imu_instance, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(imu_instance,##args))
+#define PROBE_MAG_IMU_I2C(driver, imudev, bus, addr, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(GET_I2C_DEVICE(bus,addr),##args))
+//------------------------------------
+
+
+
 //SERIAL DEFAULTS
 //#define DEFAULT_SERIAL0_PROTOCOL				SerialProtocol_MAVLink2			//A	UART0: Always: Console, MAVLink2
 //#define DEFAULT_SERIAL0_BAUD				AP_SERIALMANAGER_CONSOLE_BAUD/1000	//115200
@@ -28,17 +44,43 @@
 //#define DEFAULT_SERIAL1_BAUD				AP_SERIALMANAGER_MAVLINK_BAUD/1000	//57600
 
 //Inertial sensors
-#define HAL_INS_DEFAULT				HAL_INS_NONE
+#define HAL_INS_DEFAULT				HAL_INS_MPU9250_SPI
 #define AP_INERTIALSENSOR_ENABLED 1
 #define AP_SIM_INS_ENABLED 1
-//I2C Buses
-#define HAL_ESP32_I2C_BUSES				{}
+#define HAL_INS_MPU9250_NAME "mpu9250"
+#define HAL_INS_PROBE_LIST PROBE_IMU_SPI( Invensense, HAL_INS_MPU9250_NAME, ROTATION_NONE)
+//-----COMPASS-----
+#define AP_COMPASS_BACKEND_DEFAULT_ENABLED 1
+#define HAL_COMPASS_DEFAULT HAL_COMPASS_AK8963_MPU9250
+#define HAL_MAG_PROBE_LIST PROBE_MAG_IMU(AK8963, mpu9250, 0, ROTATION_NONE)
+#define HAL_PROBE_EXTERNAL_I2C_COMPASSES 1
+#define ALLOW_ARM_NO_COMPASS				1
+#define AP_COMPASS_AK8963_ENABLED TRUE
 
-//SPI Buses
-#define HAL_ESP32_SPI_BUSES				{}
+//-----BARO-----
+#define HAL_BARO_PROBE_LIST PROBE_BARO_I2C(BMP280, 0, 0x77)
+#define HAL_BARO_ALLOW_INIT_NO_BARO 1
 
-//SPI Devices
-#define HAL_ESP32_SPI_DEVICES			{}
+
+//#define HAL_COMPASS_MAX_SENSORS 3
+
+// SPI BUS setup, including gpio, dma, etc
+// note... we use 'vspi' for the bmp280 and mpu9250
+#define HAL_ESP32_SPI_BUSES \
+    {.host=SPI3_HOST, .dma_ch=SPI_DMA_CH_AUTO, .mosi=GPIO_NUM_36, .miso=GPIO_NUM_37, .sclk=GPIO_NUM_35}
+// tip:  VSPI_HOST  is an alternative name for esp's SPI3
+//#define HAL_ESP32_SPI_BUSES {}
+
+// SPI per-device setup, including speeds, etc.
+#define HAL_ESP32_SPI_DEVICES \
+    {.name="mpu9250", .bus=0, .device=0, .cs=GPIO_NUM_34,  .mode = 0, .lspeed=2*MHZ, .hspeed=8*MHZ}
+//#define HAL_ESP32_SPI_DEVICES {}
+
+//I2C bus list
+#define HAL_ESP32_I2C_BUSES \
+	{.port=I2C_NUM_0, .sda=GPIO_NUM_16, .scl=GPIO_NUM_15, .speed=400*KHZ, .internal=true}
+//#define HAL_ESP32_I2C_BUSES {} // using this embty block appears to cause crashes?
+
 
 //RCIN
 #define HAL_ESP32_RCIN 					GPIO_NUM_14
@@ -57,7 +99,7 @@
 #define WIFI_SSID						"ardupilot123"
 #define WIFI_PWD						"ardupilot123"
 
-//UARTs
+//HARDWARE UARTS
 #define HAL_ESP32_UART_DEVICES \
   {.port=UART_NUM_0, .rx=GPIO_NUM_44, .tx=GPIO_NUM_43 },{.port=UART_NUM_1, .rx=GPIO_NUM_17, .tx=GPIO_NUM_18 }
 
