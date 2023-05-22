@@ -207,6 +207,8 @@ static void readUniqueID(uint8_t* out_uid)
 static void handle_get_node_info(CanardInstance* ins,
                                  CanardRxTransfer* transfer)
 {
+#if CONFIG_HAL_BOARD != HAL_BOARD_ESP32
+
     uint8_t buffer[UAVCAN_PROTOCOL_GETNODEINFO_RESPONSE_MAX_SIZE] {};
     uavcan_protocol_GetNodeInfoResponse pkt {};
 
@@ -253,6 +255,9 @@ static void handle_get_node_info(CanardInstance* ins,
                                                     , periph.canfdout()
 #endif
 );
+#else
+    const int16_t resp_res = 0;
+#endif
     if (resp_res <= 0) {
         printf("Could not respond to GetNodeInfo: %d\n", resp_res);
     }
@@ -344,8 +349,11 @@ static void handle_param_getset(CanardInstance* ins, CanardRxTransfer* transfer)
     }
 
     uint8_t buffer[UAVCAN_PROTOCOL_PARAM_GETSET_RESPONSE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_protocol_param_GetSetResponse_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_protocol_param_GetSetResponse_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
     canardRequestOrRespond(ins,
                            transfer->source_node_id,
                            UAVCAN_PROTOCOL_PARAM_GETSET_SIGNATURE,
@@ -404,8 +412,11 @@ static void handle_param_executeopcode(CanardInstance* ins, CanardRxTransfer* tr
     pkt.ok = true;
 
     uint8_t buffer[UAVCAN_PROTOCOL_PARAM_EXECUTEOPCODE_RESPONSE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_protocol_param_ExecuteOpcodeResponse_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_protocol_param_ExecuteOpcodeResponse_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
     canardRequestOrRespond(ins,
                            transfer->source_node_id,
                            UAVCAN_PROTOCOL_PARAM_EXECUTEOPCODE_SIGNATURE,
