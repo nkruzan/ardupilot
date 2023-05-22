@@ -1461,7 +1461,7 @@ MAV_RESULT AP_InertialSensor::calibrate_trim()
 
     // wait 100ms for ins filter to rise
     for (uint8_t k=0; k<100/update_dt_milliseconds; k++) {
-    #if !defined ( INS_DONT_SAMPLE )
+    #if !((CONFIG_HAL_BOARD == HAL_BOARD_ESP32) && AP_SIM_ENABLED)
         wait_for_sample();
         update();
     #endif
@@ -1469,7 +1469,7 @@ MAV_RESULT AP_InertialSensor::calibrate_trim()
     }
 
     while (num_samples < 400/update_dt_milliseconds) {
-    #if !defined ( INS_DONT_SAMPLE )
+    #if !((CONFIG_HAL_BOARD == HAL_BOARD_ESP32) && AP_SIM_ENABLED)
         wait_for_sample();
         // read samples from ins
         update();
@@ -1766,7 +1766,7 @@ void AP_InertialSensor::update(void)
 {
     // during initialisation update() may be called without
     // wait_for_sample(), and a wait is implied
-#if !defined ( INS_DONT_SAMPLE )
+#if !((CONFIG_HAL_BOARD == HAL_BOARD_ESP32) && AP_SIM_ENABLED)
     wait_for_sample();
 #endif
         for (uint8_t i=0; i<INS_MAX_INSTANCES; i++) {
