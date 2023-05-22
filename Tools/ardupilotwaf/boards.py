@@ -829,7 +829,7 @@ class esp32(Board):
    #     print('esp32.set_defines()')
         env.DEFINES.update(
             CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
-            AP_SIM_ENABLED = 1,
+            AP_SIM_ENABLED = 0,
         )
 
     def set_libraries(self,env):
