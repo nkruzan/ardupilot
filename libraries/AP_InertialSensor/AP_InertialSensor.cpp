@@ -892,10 +892,12 @@ AP_InertialSensor::init(uint16_t loop_rate)
         _start_backends();
     }
 
+#if !((CONFIG_HAL_BOARD == HAL_BOARD_ESP32) && AP_SIM_ENABLED)
     // calibrate gyros unless gyro calibration has been disabled
     if (gyro_calibration_timing() != GYRO_CAL_NEVER) {
         init_gyro();
     }
+#endif
 
     _sample_period_usec = 1000*1000UL / _loop_rate;
 
@@ -1459,15 +1461,19 @@ MAV_RESULT AP_InertialSensor::calibrate_trim()
 
     // wait 100ms for ins filter to rise
     for (uint8_t k=0; k<100/update_dt_milliseconds; k++) {
+    #if !defined ( INS_DONT_SAMPLE )
         wait_for_sample();
         update();
+    #endif
         hal.scheduler->delay(update_dt_milliseconds);
     }
 
     while (num_samples < 400/update_dt_milliseconds) {
+    #if !defined ( INS_DONT_SAMPLE )
         wait_for_sample();
         // read samples from ins
         update();
+    #endif 
         // capture sample
         Vector3f samp;
         samp = get_accel(0);
@@ -1760,8 +1766,9 @@ void AP_InertialSensor::update(void)
 {
     // during initialisation update() may be called without
     // wait_for_sample(), and a wait is implied
+#if !defined ( INS_DONT_SAMPLE )
     wait_for_sample();
-
+#endif
         for (uint8_t i=0; i<INS_MAX_INSTANCES; i++) {
             // mark sensors unhealthy and let update() in each backend
             // mark them healthy via _publish_gyro() and
