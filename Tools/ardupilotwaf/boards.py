@@ -551,18 +551,29 @@ def add_dynamic_boards_esp32():
             continue
         hwdef = os.path.join(dirname, d, 'hwdef.dat')
         if os.path.exists(hwdef):
-            mcu_esp32s3 = True if (d[0:7] == "esp32s3") else False
-            sim_enabled = True if (d[0:9] == "esp32sitl") or (d[0:11] == "esp32s3sitl") else False
-            if mcu_esp32s3:
-                if sim_enabled:
-                    newclass = type(d, (esp32s3sim,), {'name': d})
-                else:
-                    newclass = type(d, (esp32s3,), {'name': d})
-            else:
-                if sim_enabled:
-                    newclass = type(d, (esp32sim,), {'name': d})
-                else:
-                    newclass = type(d, (esp32,), {'name': d})
+            this_variant = None
+            variants = sorted(['esp32','esp32s3','esp32sitl','esp32s3sitl','esp32periph','esp32s3periph','esp32periphsitl','esp32s3periphsitl'],key=len,reverse=True)
+            for variant in variants:
+                l = len(variant)
+                if (d[0:l] == variant):
+                    this_variant = variant
+                    break
+
+            if (this_variant == "esp32"):
+                newclass = type(d, (esp32,), {'name': d})
+            elif (this_variant == "esp32s3"):
+                newclass = type(d, (esp32s3,), {'name': d})
+            elif (this_variant == "esp32sitl"):
+                newclass = type(d, (esp32sim,), {'name': d})
+            elif (this_variant == "esp32s3sitl"):
+                newclass = type(d, (esp32s3sim,), {'name': d})
+            elif (this_variant == "esp32periph"):
+                newclass = type(d, (esp32periph,), {'name': d})
+            elif (this_variant == "esp32s3periph"):
+                newclass = type(d, (esp32s3periph,), {'name': d})
+            #else:
+            #   print('dynamic boards naming error, unable to determine variant')
+            #   return
 
 def get_boards_names():
     add_dynamic_boards_chibios()
