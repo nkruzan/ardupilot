@@ -998,6 +998,7 @@ bool CompassCalibrator::calculate_orientation(void)
         }
     }
     if (!pass) {
+#if HAL_GCS_ENABLED
         GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "Mag(%u) bad orientation: %u/%u %.1f", _compass_idx,
                         besti, besti2, (double)_orientation_confidence);
         (void)besti2;
@@ -1008,6 +1009,9 @@ bool CompassCalibrator::calculate_orientation(void)
         GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "Mag(%u) internal bad orientation: %u %.1f", _compass_idx, besti, (double)_orientation_confidence);
     } else {
         GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Mag(%u) new orientation: %u was %u %.1f", _compass_idx, besti, _orientation, (double)_orientation_confidence);
+#else
+        (void)besti2;
+#endif
     }
 
     if (!pass) {
@@ -1078,11 +1082,13 @@ bool CompassCalibrator::fix_radius(void)
     float correction = expected_radius / _params.radius;
 
     if (correction > COMPASS_MAX_SCALE_FACTOR || correction < COMPASS_MIN_SCALE_FACTOR) {
+#if HAL_GCS_ENABLED
         // don't allow more than 30% scale factor correction
         GCS_SEND_TEXT(MAV_SEVERITY_ERROR, "Mag(%u) bad radius %.0f expected %.0f",
                         _compass_idx,
                         _params.radius,
                         expected_radius);
+#endif
         set_status(Status::BAD_RADIUS);
         return false;
     }
