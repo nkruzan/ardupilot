@@ -1,8 +1,19 @@
 #include "EventSource.h"
 
-#if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
-
 using namespace ESP32;
 
+#if CH_CFG_USE_EVENTS == TRUE
 
-#endif //#if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
+bool EventSource::wait(uint16_t duration_us, AP_HAL::EventHandle *evt_handle)
+{
+    return true;
+}
+
+void EventSource::signal(uint32_t evt_mask)
+{
+}
+
+__RAMFUNC__ void EventSource::signalI(uint32_t evt_mask)
+{
+}
+#endif //#if CH_CFG_USE_EVENTS == TRUE

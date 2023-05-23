@@ -10,6 +10,7 @@
 
 #define loadlib_c
 #define LUA_LIB
+#define SCRIPTING_DIRECTORY
 
 #include "lprefix.h"
 

@@ -15,6 +15,8 @@
 /*
   Scripting CANSensor class, for easy scripting CAN support
  */
+#if AP_SCRIPTING_ENABLED
+
 #include "AP_Scripting_CANSensor.h"
 
 #if HAL_MAX_CAN_PROTOCOL_DRIVERS
@@ -80,3 +82,4 @@ void ScriptingCANBuffer::add_buffer(ScriptingCANBuffer* new_buff) {
 }
 
 #endif // HAL_MAX_CAN_PROTOCOL_DRIVERS
+#endif

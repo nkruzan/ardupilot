@@ -1,4 +1,5 @@
 #pragma once
+#if AP_SCRIPTING_ENABLED
 
 #include "lua/src/lua.hpp"
 
@@ -22,3 +23,4 @@ int uint32_t___bnot(lua_State *L);
 int uint32_t___tostring(lua_State *L);
 int uint32_t_toint(lua_State *L);
 int uint32_t_tofloat(lua_State *L);
+#endif

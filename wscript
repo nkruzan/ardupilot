@@ -530,7 +530,7 @@ def configure(cfg):
         cfg.end_msg('disabled', color='YELLOW')
     else:
         cfg.end_msg('enabled')
-        cfg.recurse('libraries/AP_Scripting')
+      #  cfg.recurse('libraries/AP_Scripting')
 
     cfg.recurse('libraries/AP_GPS')
 
@@ -777,7 +777,7 @@ def _build_recursion(bld):
         if bld.env.PERIPH_FW:
             dirs_to_recurse.append('Tools/AP_Periph')
 
-    dirs_to_recurse.append('libraries/AP_Scripting')
+   # dirs_to_recurse.append('libraries/AP_Scripting')
 
     if bld.env.ENABLE_ONVIF:
         dirs_to_recurse.append('libraries/AP_ONVIF')

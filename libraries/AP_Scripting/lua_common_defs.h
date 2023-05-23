@@ -1,4 +1,5 @@
 #pragma once
+#if AP_SCRIPTING_ENABLED
 
 #include <AP_HAL/AP_HAL_Boards.h>
 
@@ -27,3 +28,4 @@
 #endif // REPL_OUT
 
 int lua_get_current_ref();
+#endif

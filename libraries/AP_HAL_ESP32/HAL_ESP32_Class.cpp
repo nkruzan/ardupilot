@@ -80,10 +80,11 @@ static Empty::Flash flashDriver;
 static AP_HAL::SIMState xsimstate;
 #endif
 #if HAL_NUM_CAN_IFACES > 0
-static ESP32::CANIface* canDrivers[HAL_NUM_CAN_IFACES];
+//static ESP32::CANIface* canDrivers[HAL_NUM_CAN_IFACES];
 #else
-static ESP32::CANIface** canDrivers;
+//static ESP32::CANIface** canDrivers;
 #endif
+
 
 extern const AP_HAL::HAL& hal;
 

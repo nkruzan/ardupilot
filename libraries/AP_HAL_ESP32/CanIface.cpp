@@ -543,7 +543,7 @@ uint32_t CANIface::getErrorCount() const
 #endif // #if !defined(HAL_BUILD_AP_PERIPH) && !defined(HAL_BOOTLOADER_BUILD)
 
 #if CH_CFG_USE_EVENTS == TRUE
-ChibiOS::EventSource CANIface::evt_src_;
+ESP32::EventSource CANIface::evt_src_;
 bool CANIface::set_event_handle(AP_HAL::EventHandle* handle)
 {
     CriticalSectionLocker lock;
@@ -570,7 +570,7 @@ bool CANIface::select(bool &read, bool &write,
 {
     const bool in_read = read;
     const bool in_write= write;
-   //uint64_t time = AP_HAL::micros64();
+   uint64_t time = AP_HAL::micros64();
 
     if (!read && !write) {
         //invalid request
