@@ -184,6 +184,8 @@ class SizeCompareBranches(object):
             'esp32s3devkit',
             'esp32sitl',
             'esp32s3sitl',
+            'esp32periph',
+            'esp32s3periph',
             'esp32icarous',
             'esp32diy',
         ]
