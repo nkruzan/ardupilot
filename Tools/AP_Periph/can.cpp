@@ -36,6 +36,11 @@
 #include <AP_HAL_ChibiOS/hwdef/common/watchdog.h>
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <AP_HAL_SITL/CANSocketIface.h>
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+#include <AP_HAL_ESP32/CANIface.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "esp_system.h"
 #endif
 
 #define IFACE_ALL ((1U<<(HAL_NUM_CAN_IFACES+1U))-1U)
@@ -101,6 +106,8 @@ static struct instance_t {
     AP_HAL::CANIface* iface;
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
     HALSITL::CANIface* iface;
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    ESP32::CANIface* iface;
 #endif
 } instances[HAL_NUM_CAN_IFACES];
 
@@ -170,6 +177,8 @@ uint8_t PreferredNodeID = HAL_CAN_DEFAULT_NODE_ID;
 ChibiOS::CANIface* AP_Periph_FW::can_iface_periph[HAL_NUM_CAN_IFACES];
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
 HALSITL::CANIface* AP_Periph_FW::can_iface_periph[HAL_NUM_CAN_IFACES];
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+ESP32::CANIface* AP_Periph_FW::can_iface_periph[HAL_NUM_CAN_IFACES];
 #endif
 
 #if AP_CAN_SLCAN_ENABLED
@@ -207,6 +216,8 @@ static void readUniqueID(uint8_t* out_uid)
 static void handle_get_node_info(CanardInstance* ins,
                                  CanardRxTransfer* transfer)
 {
+#if CONFIG_HAL_BOARD != HAL_BOARD_ESP32
+
     uint8_t buffer[UAVCAN_PROTOCOL_GETNODEINFO_RESPONSE_MAX_SIZE] {};
     uavcan_protocol_GetNodeInfoResponse pkt {};
 
@@ -235,7 +246,11 @@ static void handle_get_node_info(CanardInstance* ins,
     }
     pkt.name.len = strnlen((char*)pkt.name.data, sizeof(pkt.name.data));
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_protocol_GetNodeInfoResponse_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_protocol_GetNodeInfoResponse_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     const int16_t resp_res = canardRequestOrRespond(ins,
                                                     transfer->source_node_id,
@@ -253,6 +268,9 @@ static void handle_get_node_info(CanardInstance* ins,
                                                     , periph.canfdout()
 #endif
 );
+#else
+    const int16_t resp_res = 0;
+#endif
     if (resp_res <= 0) {
         printf("Could not respond to GetNodeInfo: %d\n", resp_res);
     }
@@ -344,8 +362,11 @@ static void handle_param_getset(CanardInstance* ins, CanardRxTransfer* transfer)
     }
 
     uint8_t buffer[UAVCAN_PROTOCOL_PARAM_GETSET_RESPONSE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_protocol_param_GetSetResponse_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_protocol_param_GetSetResponse_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
     canardRequestOrRespond(ins,
                            transfer->source_node_id,
                            UAVCAN_PROTOCOL_PARAM_GETSET_SIGNATURE,
@@ -404,8 +425,11 @@ static void handle_param_executeopcode(CanardInstance* ins, CanardRxTransfer* tr
     pkt.ok = true;
 
     uint8_t buffer[UAVCAN_PROTOCOL_PARAM_EXECUTEOPCODE_RESPONSE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_protocol_param_ExecuteOpcodeResponse_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_protocol_param_ExecuteOpcodeResponse_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
     canardRequestOrRespond(ins,
                            transfer->source_node_id,
                            UAVCAN_PROTOCOL_PARAM_EXECUTEOPCODE_SIGNATURE,
@@ -456,7 +480,11 @@ static void handle_begin_firmware_update(CanardInstance* ins, CanardRxTransfer* 
     uavcan_protocol_file_BeginFirmwareUpdateResponse reply {};
     reply.error = UAVCAN_PROTOCOL_FILE_BEGINFIRMWAREUPDATE_RESPONSE_ERROR_OK;
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint32_t total_size = uavcan_protocol_file_BeginFirmwareUpdateResponse_encode(&reply, buffer);
+#else
     uint32_t total_size = uavcan_protocol_file_BeginFirmwareUpdateResponse_encode(&reply, buffer, !periph.canfdout());
+#endif
     canardRequestOrRespond(ins,
                            transfer->source_node_id,
                            UAVCAN_PROTOCOL_FILE_BEGINFIRMWAREUPDATE_SIGNATURE,
@@ -878,7 +906,11 @@ static void can_safety_button_update(void)
     pkt.press_time = counter;
 
     uint8_t buffer[ARDUPILOT_INDICATION_BUTTON_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = ardupilot_indication_Button_encode(&pkt, buffer);
+#else
     uint16_t total_size = ardupilot_indication_Button_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     canard_broadcast(ARDUPILOT_INDICATION_BUTTON_SIGNATURE,
                     ARDUPILOT_INDICATION_BUTTON_ID,
@@ -1291,8 +1323,11 @@ static void node_status_send(void)
 
     node_status.vendor_specific_status_code = hal.util->available_memory();
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint32_t len = uavcan_protocol_NodeStatus_encode(&node_status, buffer);
+#else
     uint32_t len = uavcan_protocol_NodeStatus_encode(&node_status, buffer, !periph.canfdout());
-
+#endif
     canard_broadcast(UAVCAN_PROTOCOL_NODESTATUS_SIGNATURE,
                     UAVCAN_PROTOCOL_NODESTATUS_ID,
                     CANARD_TRANSFER_PRIORITY_LOW,
@@ -1581,7 +1616,11 @@ void AP_Periph_FW::pwm_hardpoint_update()
         cmd.command = value;
 
         uint8_t buffer[UAVCAN_EQUIPMENT_HARDPOINT_COMMAND_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_hardpoint_Command_encode(&cmd, buffer);
+#else
         uint16_t total_size = uavcan_equipment_hardpoint_Command_encode(&cmd, buffer, !periph.canfdout());
+#endif
         canard_broadcast(UAVCAN_EQUIPMENT_HARDPOINT_COMMAND_SIGNATURE,
                         UAVCAN_EQUIPMENT_HARDPOINT_COMMAND_ID,
                         CANARD_TRANSFER_PRIORITY_LOW,
@@ -1609,7 +1648,11 @@ void AP_Periph_FW::hwesc_telem_update()
     pkt.error_count = t.error_count;
 
     uint8_t buffer[UAVCAN_EQUIPMENT_ESC_STATUS_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_equipment_esc_Status_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_equipment_esc_Status_encode(&pkt, buffer, !periph.canfdout());
+#endif
     canard_broadcast(UAVCAN_EQUIPMENT_ESC_STATUS_SIGNATURE,
                     UAVCAN_EQUIPMENT_ESC_STATUS_ID,
                     CANARD_TRANSFER_PRIORITY_LOW,
@@ -1662,7 +1705,11 @@ void AP_Periph_FW::esc_telem_update()
         pkt.error_count = 0;
 
         uint8_t buffer[UAVCAN_EQUIPMENT_ESC_STATUS_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_esc_Status_encode(&pkt, buffer);
+#else
         uint16_t total_size = uavcan_equipment_esc_Status_encode(&pkt, buffer, !periph.canfdout());
+#endif
         canard_broadcast(UAVCAN_EQUIPMENT_ESC_STATUS_SIGNATURE,
                          UAVCAN_EQUIPMENT_ESC_STATUS_ID,
                          CANARD_TRANSFER_PRIORITY_LOW,
@@ -1804,8 +1851,11 @@ void AP_Periph_FW::can_mag_update(void)
     }
 
     uint8_t buffer[UAVCAN_EQUIPMENT_AHRS_MAGNETICFIELDSTRENGTH_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_equipment_ahrs_MagneticFieldStrength_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_equipment_ahrs_MagneticFieldStrength_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
     canard_broadcast(UAVCAN_EQUIPMENT_AHRS_MAGNETICFIELDSTRENGTH_SIGNATURE,
                     UAVCAN_EQUIPMENT_AHRS_MAGNETICFIELDSTRENGTH_ID,
                     CANARD_TRANSFER_PRIORITY_LOW,
@@ -1865,8 +1915,11 @@ void AP_Periph_FW::can_battery_update(void)
 #endif //defined(HAL_PERIPH_BATTERY_SKIP_NAME)
 
         uint8_t buffer[UAVCAN_EQUIPMENT_POWER_BATTERYINFO_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        const uint16_t total_size = uavcan_equipment_power_BatteryInfo_encode(&pkt, buffer);
+#else
         const uint16_t total_size = uavcan_equipment_power_BatteryInfo_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
         canard_broadcast(UAVCAN_EQUIPMENT_POWER_BATTERYINFO_SIGNATURE,
                         UAVCAN_EQUIPMENT_POWER_BATTERYINFO_ID,
                         CANARD_TRANSFER_PRIORITY_LOW,
@@ -1995,8 +2048,11 @@ void AP_Periph_FW::can_gps_update(void)
         check_float16_range(pkt.covariance.data, pkt.covariance.len);
 
         uint8_t buffer[UAVCAN_EQUIPMENT_GNSS_FIX2_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_gnss_Fix2_encode(&pkt, buffer);
+#else
         uint16_t total_size = uavcan_equipment_gnss_Fix2_encode(&pkt, buffer, !periph.canfdout());
-
+#endif
         canard_broadcast(UAVCAN_EQUIPMENT_GNSS_FIX2_SIGNATURE,
                         UAVCAN_EQUIPMENT_GNSS_FIX2_ID,
                         CANARD_TRANSFER_PRIORITY_LOW,
@@ -2013,7 +2069,11 @@ void AP_Periph_FW::can_gps_update(void)
         aux.vdop = gps.get_vdop() * 0.01;
 
         uint8_t buffer[UAVCAN_EQUIPMENT_GNSS_AUXILIARY_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_gnss_Auxiliary_encode(&aux, buffer);
+#else
         uint16_t total_size = uavcan_equipment_gnss_Auxiliary_encode(&aux, buffer, !periph.canfdout());
+#endif        
         canard_broadcast(UAVCAN_EQUIPMENT_GNSS_AUXILIARY_SIGNATURE,
                         UAVCAN_EQUIPMENT_GNSS_AUXILIARY_ID,
                         CANARD_TRANSFER_PRIORITY_LOW,
@@ -2040,7 +2100,11 @@ void AP_Periph_FW::can_gps_update(void)
         }
 
         uint8_t buffer[ARDUPILOT_GNSS_STATUS_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        const uint16_t total_size = ardupilot_gnss_Status_encode(&status, buffer);
+#else
         const uint16_t total_size = ardupilot_gnss_Status_encode(&status, buffer, !periph.canfdout());
+#endif
         canard_broadcast(ARDUPILOT_GNSS_STATUS_SIGNATURE,
                         ARDUPILOT_GNSS_STATUS_ID,
                         CANARD_TRANSFER_PRIORITY_LOW,
@@ -2062,7 +2126,11 @@ void AP_Periph_FW::can_gps_update(void)
             heading.heading_rad = radians(yaw_deg);
             heading.heading_accuracy_rad = radians(yaw_acc_deg);
             uint8_t buffer[ARDUPILOT_GNSS_HEADING_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+            const uint16_t total_size = ardupilot_gnss_Heading_encode(&heading, buffer);
+#else
             const uint16_t total_size = ardupilot_gnss_Heading_encode(&heading, buffer, !periph.canfdout());
+#endif
             canard_broadcast(ARDUPILOT_GNSS_HEADING_SIGNATURE,
                              ARDUPILOT_GNSS_HEADING_ID,
                              CANARD_TRANSFER_PRIORITY_LOW,
@@ -2092,7 +2160,11 @@ void AP_Periph_FW::send_moving_baseline_msg()
     mbldata.data.len = len;
     memcpy(mbldata.data.data, data, len);
     uint8_t buffer[ARDUPILOT_GNSS_MOVINGBASELINEDATA_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    const uint16_t total_size = ardupilot_gnss_MovingBaselineData_encode(&mbldata, buffer);
+#else
     const uint16_t total_size = ardupilot_gnss_MovingBaselineData_encode(&mbldata, buffer, !periph.canfdout());
+#endif
 
 #if HAL_NUM_CAN_IFACES >= 2
     if (gps_mb_can_port != -1 && (gps_mb_can_port < HAL_NUM_CAN_IFACES)) {
@@ -2144,7 +2216,11 @@ void AP_Periph_FW::send_relposheading_msg() {
     relpos.reported_heading_acc_deg = reported_heading_acc;
     relpos.reported_heading_acc_available = !is_zero(relpos.reported_heading_acc_deg);
     uint8_t buffer[ARDUPILOT_GNSS_RELPOSHEADING_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    const uint16_t total_size = ardupilot_gnss_RelPosHeading_encode(&relpos, buffer);
+#else
     const uint16_t total_size = ardupilot_gnss_RelPosHeading_encode(&relpos, buffer, !periph.canfdout());
+#endif
     canard_broadcast(ARDUPILOT_GNSS_RELPOSHEADING_SIGNATURE,
                     ARDUPILOT_GNSS_RELPOSHEADING_ID,
                     CANARD_TRANSFER_PRIORITY_LOW,
@@ -2181,7 +2257,11 @@ void AP_Periph_FW::can_baro_update(void)
         pkt.static_pressure_variance = 0; // should we make this a parameter?
 
         uint8_t buffer[UAVCAN_EQUIPMENT_AIR_DATA_STATICPRESSURE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_air_data_StaticPressure_encode(&pkt, buffer);
+#else
         uint16_t total_size = uavcan_equipment_air_data_StaticPressure_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
         canard_broadcast(UAVCAN_EQUIPMENT_AIR_DATA_STATICPRESSURE_SIGNATURE,
                         UAVCAN_EQUIPMENT_AIR_DATA_STATICPRESSURE_ID,
@@ -2196,7 +2276,11 @@ void AP_Periph_FW::can_baro_update(void)
         pkt.static_temperature_variance = 0; // should we make this a parameter?
 
         uint8_t buffer[UAVCAN_EQUIPMENT_AIR_DATA_STATICTEMPERATURE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = uavcan_equipment_air_data_StaticTemperature_encode(&pkt, buffer);
+#else
         uint16_t total_size = uavcan_equipment_air_data_StaticTemperature_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
         canard_broadcast(UAVCAN_EQUIPMENT_AIR_DATA_STATICTEMPERATURE_SIGNATURE,
                         UAVCAN_EQUIPMENT_AIR_DATA_STATICTEMPERATURE_ID,
@@ -2257,7 +2341,11 @@ void AP_Periph_FW::can_airspeed_update(void)
     pkt.pitot_temperature = nanf("");
 
     uint8_t buffer[UAVCAN_EQUIPMENT_AIR_DATA_RAWAIRDATA_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_equipment_air_data_RawAirData_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_equipment_air_data_RawAirData_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     canard_broadcast(UAVCAN_EQUIPMENT_AIR_DATA_RAWAIRDATA_SIGNATURE,
                     UAVCAN_EQUIPMENT_AIR_DATA_RAWAIRDATA_ID,
@@ -2342,7 +2430,11 @@ void AP_Periph_FW::can_rangefinder_update(void)
     pkt.range = dist_cm * 0.01;
 
     uint8_t buffer[UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = uavcan_equipment_range_sensor_Measurement_encode(&pkt, buffer);
+#else
     uint16_t total_size = uavcan_equipment_range_sensor_Measurement_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     canard_broadcast(UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_SIGNATURE,
                     UAVCAN_EQUIPMENT_RANGE_SENSOR_MEASUREMENT_ID,
@@ -2407,7 +2499,11 @@ void AP_Periph_FW::can_proximity_update()
         }
 
         uint8_t buffer[ARDUPILOT_EQUIPMENT_PROXIMITY_SENSOR_PROXIMITY_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        uint16_t total_size = ardupilot_equipment_proximity_sensor_Proximity_encode(&pkt, buffer);
+#else
         uint16_t total_size = ardupilot_equipment_proximity_sensor_Proximity_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
         canard_broadcast(ARDUPILOT_EQUIPMENT_PROXIMITY_SENSOR_PROXIMITY_SIGNATURE,
                         ARDUPILOT_EQUIPMENT_PROXIMITY_SENSOR_PROXIMITY_ID,
@@ -2469,7 +2565,11 @@ void AP_Periph_FW::can_send_ADSB(struct __mavlink_adsb_vehicle_t &msg)
     pkt.baro_valid = (msg.flags & 0x0100) != 0;
 
     uint8_t buffer[ARDUPILOT_EQUIPMENT_TRAFFICMONITOR_TRAFFICREPORT_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint16_t total_size = ardupilot_equipment_trafficmonitor_TrafficReport_encode(&pkt, buffer);
+#else
     uint16_t total_size = ardupilot_equipment_trafficmonitor_TrafficReport_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     canard_broadcast(ARDUPILOT_EQUIPMENT_TRAFFICMONITOR_TRAFFICREPORT_SIGNATURE,
                     ARDUPILOT_EQUIPMENT_TRAFFICMONITOR_TRAFFICREPORT_ID,
@@ -2653,7 +2753,11 @@ void AP_Periph_FW::can_efi_update(void)
         c.lambda_coefficient = state_c.lambda_coefficient;
 
         uint8_t buffer[UAVCAN_EQUIPMENT_ICE_RECIPROCATING_STATUS_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        const uint16_t total_size = uavcan_equipment_ice_reciprocating_Status_encode(&pkt, buffer);
+#else
         const uint16_t total_size = uavcan_equipment_ice_reciprocating_Status_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
         canard_broadcast(UAVCAN_EQUIPMENT_ICE_RECIPROCATING_STATUS_SIGNATURE,
                         UAVCAN_EQUIPMENT_ICE_RECIPROCATING_STATUS_ID,
@@ -2691,7 +2795,11 @@ void can_printf(const char *fmt, ...)
         buffer_offset += pkt.text.len;
 
         uint8_t buffer_packet[UAVCAN_PROTOCOL_DEBUG_LOGMESSAGE_MAX_SIZE] {};
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+        const uint32_t len = uavcan_protocol_debug_LogMessage_encode(&pkt, buffer_packet);
+#else
         const uint32_t len = uavcan_protocol_debug_LogMessage_encode(&pkt, buffer_packet, !periph.canfdout());
+#endif
 
         canard_broadcast(UAVCAN_PROTOCOL_DEBUG_LOGMESSAGE_SIGNATURE,
                         UAVCAN_PROTOCOL_DEBUG_LOGMESSAGE_ID,
@@ -2709,7 +2817,11 @@ void can_printf(const char *fmt, ...)
     va_end(ap);
     pkt.text.len = MIN(n, sizeof(pkt.text.data));
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    uint32_t len = uavcan_protocol_debug_LogMessage_encode(&pkt, buffer);
+#else
     uint32_t len = uavcan_protocol_debug_LogMessage_encode(&pkt, buffer, !periph.canfdout());
+#endif
 
     canard_broadcast(UAVCAN_PROTOCOL_DEBUG_LOGMESSAGE_SIGNATURE,
                     UAVCAN_PROTOCOL_DEBUG_LOGMESSAGE_ID,

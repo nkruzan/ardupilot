@@ -99,17 +99,29 @@ def esp32_firmware(self):
     build = esp_idf.build('all', target='esp-idf_build/ardupilot.bin')
     build.post()
 
-    build.cmake_build_task.set_run_after(self.link_task)
+    if str(self.link_task.outputs[0]).endswith('libAP_Periph.a'):
+        src_in = [self.bld.bldnode.find_or_declare('lib/libAP_Periph_libs.a'),
+                    self.bld.bldnode.find_or_declare('lib/bin/libAP_Periph.a')]
+        img_out = self.bld.bldnode.find_or_declare('bin/AP_Periph.a')
+        self.generate_bin_task = self.create_task('join_esp32_periph_libs', src=src_in, tgt=img_out)
+        self.generate_bin_task.set_run_after(self.link_task)
+        build.cmake_build_task.set_run_after(self.generate_bin_task)
+    else:
+        build.cmake_build_task.set_run_after(self.link_task)
 
-    # tool that can update the default params in a .bin or .apj
-    #self.default_params_task = self.create_task('set_default_parameters',
-    #                                          src='esp-idf_build/ardupilot.bin')
-    #self.default_params_task.set_run_after(self.generate_bin_task)
-
-    # optional upload is last
     if self.bld.options.upload:
         flasher = esp_idf.build('flash')
         flasher.post()
+
+class join_esp32_periph_libs(Task.Task):
+    '''wrap together libs'''
+    run_str="xtensa-esp32s3-elf-ar -M < ../../libraries/AP_HAL_ESP32/utils/periph.mri"
+    always_run = True
+    def keyword(self):
+        return "wrap periph libs"
+    def __str__(self):
+        return self.outputs[0].path_from(self.generator.bld.bldnode)
+
 
 
 class set_default_parameters(Task.Task):
