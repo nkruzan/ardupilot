@@ -19,6 +19,8 @@
 #include "esp32sitl.h" //Nick K. on discord
 #elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_ESP32_S3SITL
 #include "esp32s3sitl.h" //Nick K. on discord
+#elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_ESP32_S3PERIPH
+#include "esp32s3periph.h" 
 #endif
 
 #define HAL_BOARD_NAME "ESP32"
