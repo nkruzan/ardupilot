@@ -112,6 +112,18 @@ def esp32_firmware(self):
         flasher.post()
 
 
+
+class join_esp32_periph_libs(Task.Task):
+    '''wrap together libs'''
+    run_str="xtensa-esp32s3-elf-ar -M < ../../libraries/AP_HAL_ESP32/utils/periph.mri"
+    always_run = True
+    def keyword(self):
+        return "wrap periph libs"
+    def __str__(self):
+        return self.outputs[0].path_from(self.generator.bld.bldnode)
+
+
+
 class set_default_parameters(Task.Task):
     color='CYAN'
     always_run = True

@@ -578,13 +578,18 @@ def add_dynamic_boards_esp32():
 def get_boards_names():
     add_dynamic_boards_chibios()
     add_dynamic_boards_esp32()
-
     return sorted(list(_board_classes.keys()), key=str.lower)
 
 def get_ap_periph_boards():
+    list1 = get_ap_periph_boards_in_dir('libraries/AP_HAL_ChibiOS/hwdef')
+    list2 = get_ap_periph_boards_in_dir('libraries/AP_HAL_ESP32/hwdef')
+    return list(set(list1)|set(list2))
+
+
+def get_ap_periph_boards_in_dir(dir):
     '''Add AP_Periph boards based on existance of periph keywork in hwdef.dat or board name'''
     list_ap = [s for s in list(_board_classes.keys()) if "periph" in s]
-    dirname, dirlist, filenames = next(os.walk('libraries/AP_HAL_ChibiOS/hwdef'))
+    dirname, dirlist, filenames = next(os.walk(dir))
     for d in dirlist:
         if d in list_ap:
             continue
@@ -947,6 +952,27 @@ class esp32sim(esp32):
 class esp32s3sim(esp32sim):
     abstract = True
     toolchain = 'xtensa-esp32s3-elf'
+
+class esp32periph(esp32):
+    abstract = True
+    toolchain = 'xtensa-esp32-elf'
+    def set_defines(self,env):
+        env.AP_PERIPH = 1
+        env.DEFINES.update(
+            CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
+            AP_PERIPH = 1,
+        )
+
+    def set_libraries(self,env):
+        env.AP_LIBRARIES += [
+            'AP_HAL_ESP32',
+        ]
+
+class esp32s3periph(esp32periph):
+    abstract = True
+    toolchain = 'xtensa-esp32s3-elf'
+
+
 
 class chibios(Board):
     abstract = True
