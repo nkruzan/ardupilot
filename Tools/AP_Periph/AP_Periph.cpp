@@ -48,7 +48,12 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 void stm32_watchdog_init() {}
 void stm32_watchdog_pat() {}
 #endif
-
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+#include <esp_task_wdt.h>
+#include <AP_HAL_ESP32/AP_HAL_ESP32.h>
+void stm32_watchdog_init() {}
+void stm32_watchdog_pat() { esp_task_wdt_reset(); }   
+#endif
 void setup(void)
 {
     periph.init();
@@ -125,8 +130,9 @@ void AP_Periph_FW::init()
 #if HAL_LOGGING_ENABLED
     logger.Init(log_structure, ARRAY_SIZE(log_structure));
 #endif
-
+#if AP_CHECK_FIRMWARE_ENABLED
     check_firmware_print();
+#endif
 
     if (hal.util->was_watchdog_reset()) {
         printf("Reboot after watchdog reset\n");

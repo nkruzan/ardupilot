@@ -6,9 +6,9 @@
 */
 #include <stddef.h>
 
-int main(int argc, char *argv[]);
+extern int _____main(int argc, char *argv[]);
 
 void app_main()
 {
-    main(0, NULL);
+    _____main(0, NULL);
 }

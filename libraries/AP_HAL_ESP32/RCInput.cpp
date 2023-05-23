@@ -13,7 +13,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <AP_Math/AP_Math.h>
+#if HAL_GCS_ENABLED
 #include <GCS_MAVLink/GCS.h>
+#endif
 
 #include "AP_HAL_ESP32.h"
 #include "RCInput.h"
@@ -32,7 +34,9 @@ void RCInput::init()
 #ifdef HAL_ESP32_RCIN
     sig_reader.init();
 #endif
+#if AP_RCPROTOCOL_ENABLED
     _init = true;
+#endif 
 }
 
 bool RCInput::new_input()
@@ -93,8 +97,9 @@ void RCInput::_timer_tick(void)
         return;
     }
 
+#if AP_RCPROTOCOL_ENABLED
     AP_RCProtocol &rcprot = AP::RC();
-
+#endif
 #ifdef HAL_ESP32_RCIN
     uint32_t width_s0, width_s1;
     while (sig_reader.read(width_s0, width_s1)) {
@@ -121,7 +126,9 @@ void RCInput::_timer_tick(void)
 #ifndef HAL_NO_UARTDRIVER
     if (rc_protocol && rc_protocol != last_protocol) {
         last_protocol = rc_protocol;
+#if HAL_GCS_ENABLED
         gcs().send_text(MAV_SEVERITY_DEBUG, "RCInput: decoding %s", last_protocol);
+#endif
     }
 #endif
 

@@ -60,20 +60,20 @@ class Board:
              (cfg.env.BOARD_FLASH_SIZE > 1024)))):
 
             env.DEFINES.update(
-                AP_SCRIPTING_ENABLED = 1,
+                AP_SCRIPTING_ENABLED = 0,
                 LUA_32BITS = 1,
                 )
 
             env.AP_LIBRARIES += [
-                'AP_Scripting',
-                'AP_Scripting/lua/src',
+#                'AP_Scripting',
+#                'AP_Scripting/lua/src',
                 ]
 
         else:
             cfg.options.disable_scripting = True
 
         # allow GCS disable for AP_DAL example
-        if cfg.options.no_gcs:
+ #       if cfg.options.no_gcs:
             env.CXXFLAGS += ['-DHAL_GCS_ENABLED=0']
 
         # configurations for XRCE-DDS
@@ -551,29 +551,45 @@ def add_dynamic_boards_esp32():
             continue
         hwdef = os.path.join(dirname, d, 'hwdef.dat')
         if os.path.exists(hwdef):
-            mcu_esp32s3 = True if (d[0:7] == "esp32s3") else False
-            sim_enabled = True if (d[0:9] == "esp32sitl") or (d[0:11] == "esp32s3sitl") else False
-            if mcu_esp32s3:
-                if sim_enabled:
-                    newclass = type(d, (esp32s3sim,), {'name': d})
-                else:
-                    newclass = type(d, (esp32s3,), {'name': d})
-            else:
-                if sim_enabled:
-                    newclass = type(d, (esp32sim,), {'name': d})
-                else:
-                    newclass = type(d, (esp32,), {'name': d})
+            this_variant = None
+            variants = sorted(['esp32','esp32s3','esp32sitl','esp32s3sitl','esp32periph','esp32s3periph','esp32periphsitl','esp32s3periphsitl'],key=len,reverse=True)
+            for variant in variants:
+                l = len(variant)
+                if (d[0:l] == variant):
+                    this_variant = variant
+                    break
+
+            if (this_variant == "esp32"):
+                newclass = type(d, (esp32,), {'name': d})
+            elif (this_variant == "esp32s3"):
+                newclass = type(d, (esp32s3,), {'name': d})
+            elif (this_variant == "esp32sitl"):
+                newclass = type(d, (esp32sim,), {'name': d})
+            elif (this_variant == "esp32s3sitl"):
+                newclass = type(d, (esp32s3sim,), {'name': d})
+            elif (this_variant == "esp32periph"):
+                newclass = type(d, (esp32periph,), {'name': d})
+            elif (this_variant == "esp32s3periph"):
+                newclass = type(d, (esp32s3periph,), {'name': d})
+            #else:
+            #   print('dynamic boards naming error, unable to determine variant')
+            #   return
 
 def get_boards_names():
     add_dynamic_boards_chibios()
     add_dynamic_boards_esp32()
-
     return sorted(list(_board_classes.keys()), key=str.lower)
 
 def get_ap_periph_boards():
+    list1 = get_ap_periph_boards_in_dir('libraries/AP_HAL_ChibiOS/hwdef')
+    list2 = get_ap_periph_boards_in_dir('libraries/AP_HAL_ESP32/hwdef')
+    return list(set(list1)|set(list2))
+
+
+def get_ap_periph_boards_in_dir(dir):
     '''Add AP_Periph boards based on existance of periph keywork in hwdef.dat or board name'''
     list_ap = [s for s in list(_board_classes.keys()) if "periph" in s]
-    dirname, dirlist, filenames = next(os.walk('libraries/AP_HAL_ChibiOS/hwdef'))
+    dirname, dirlist, filenames = next(os.walk(dir))
     for d in dirlist:
         if d in list_ap:
             continue
@@ -594,7 +610,6 @@ def get_ap_periph_boards():
                     if 'AP_PERIPH' in content:
                         list_ap.append(d)
                         continue
-
     list_ap = list(set(list_ap))
     return list_ap
 
@@ -936,6 +951,27 @@ class esp32sim(esp32):
 class esp32s3sim(esp32sim):
     abstract = True
     toolchain = 'xtensa-esp32s3-elf'
+
+class esp32periph(esp32):
+    abstract = True
+    toolchain = 'xtensa-esp32-elf'
+    def set_defines(self,env):
+        env.AP_PERIPH = 1
+        env.DEFINES.update(
+            CONFIG_HAL_BOARD = 'HAL_BOARD_ESP32',
+            AP_PERIPH = 1,
+        )
+
+    def set_libraries(self,env):
+        env.AP_LIBRARIES += [
+            'AP_HAL_ESP32',
+        ]
+
+class esp32s3periph(esp32periph):
+    abstract = True
+    toolchain = 'xtensa-esp32s3-elf'
+
+
 
 class chibios(Board):
     abstract = True

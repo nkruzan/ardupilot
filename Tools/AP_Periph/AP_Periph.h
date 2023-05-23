@@ -61,16 +61,59 @@
 #endif
 
 #include "Parameters.h"
-
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#include <AP_HAL_SITL/CANSocketIface.h>
 void stm32_watchdog_init();
 void stm32_watchdog_pat();
 #endif
-/*
-  app descriptor for firmware checking
- */
-extern const app_descriptor_t app_descriptor;
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+void stm32_watchdog_init();
+void stm32_watchdog_pat();
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "soc/rtc_wdt.h"
+#include "esp_int_wdt.h"  //Interrupt Watchdog Timer
+#include "esp_task_wdt.h" //Task Watchdog Timer (TWDT)
+#include <AP_HAL_ESP32/CANIface.h>
+
+#ifndef FW_MAJOR
+#define APP_FW_MAJOR 0
+#define APP_FW_MINOR 0
+#else
+#define APP_FW_MAJOR FW_MAJOR
+#define APP_FW_MINOR FW_MINOR
+#endif
+
+#if CONFIG_HAL_BOARD == HAL_BOARD_ESP32 && !defined(APJ_BOARD_ID)
+#define APJ_BOARD_ID 0
+#endif
+
+#define AP_APP_DESCRIPTOR_SIGNATURE_UNSIGNED { 0x40, 0xa2, 0xe4, 0xf1, 0x64, 0x68, 0x91, 0x06 }
+
+struct app_descriptor_t {
+    uint8_t sig[8] = AP_APP_DESCRIPTOR_SIGNATURE_UNSIGNED;
+    // crc1 is the crc32 from firmware start to start of image_crc1
+    uint32_t image_crc1 = 0;
+    // crc2 is the crc32 from the start of version_major to the end of the firmware
+    uint32_t image_crc2 = 0;
+    // total size of firmware image in bytes
+    uint32_t image_size = 0;
+    uint32_t git_hash = 0;
+
+    // software version number
+    uint8_t  version_major = APP_FW_MAJOR;
+    uint8_t version_minor = APP_FW_MINOR;
+    // APJ_BOARD_ID (hardware version). This is also used in CAN NodeInfo
+    // with high byte in HardwareVersion.major and low byte in HardwareVersion.minor
+    uint16_t  board_id = APJ_BOARD_ID;
+    uint8_t reserved[8] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+};
+
+typedef struct app_descriptor_t app_descriptor;
+#else
+extern const app_descriptor_t app_descriptor;
+#endif
 extern "C" {
 void can_printf(const char *fmt, ...) FMT_PRINTF(1,2);
 }
@@ -122,6 +165,8 @@ public:
     static ChibiOS::CANIface* can_iface_periph[HAL_NUM_CAN_IFACES];
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
     static HALSITL::CANIface* can_iface_periph[HAL_NUM_CAN_IFACES];
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+    static ESP32::CANIface* can_iface_periph[HAL_NUM_CAN_IFACES];
 #endif
 
 #if AP_CAN_SLCAN_ENABLED

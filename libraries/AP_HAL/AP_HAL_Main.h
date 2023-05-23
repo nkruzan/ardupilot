@@ -19,7 +19,7 @@
 #include "HAL.h"
 
 #ifndef AP_MAIN
-#define AP_MAIN main
+#define AP_MAIN _____main
 #endif
 
 #define AP_HAL_MAIN() \

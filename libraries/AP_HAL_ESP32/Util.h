@@ -64,7 +64,7 @@ public:
 
 #if CH_DBG_ENABLE_STACK_CHECK == TRUE
     // request information on running threads
-    size_t thread_info(char *buf, size_t bufsize) override;
+    size_t thread_info(char *buf, size_t bufsize);
 #endif
 
 private:

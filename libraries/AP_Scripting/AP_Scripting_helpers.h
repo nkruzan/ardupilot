@@ -1,4 +1,5 @@
 #pragma once
+#if AP_SCRIPTING_ENABLED
 
 #include <AP_Param/AP_Param.h>
 #include "lua/src/lua.hpp"
@@ -28,3 +29,4 @@ private:
     AP_Param *vp;
 };
 
+#endif
