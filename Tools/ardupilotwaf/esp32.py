@@ -109,17 +109,9 @@ def esp32_firmware(self):
     else:
         build.cmake_build_task.set_run_after(self.link_task)
 
-    # tool that can update the default params in a .bin or .apj
-    #self.default_params_task = self.create_task('set_default_parameters',
-    #                                          src='esp-idf_build/ardupilot.bin')
-    #self.default_params_task.set_run_after(self.generate_bin_task)
-
-    # optional upload is last
     if self.bld.options.upload:
         flasher = esp_idf.build('flash')
         flasher.post()
-
-
 
 class join_esp32_periph_libs(Task.Task):
     '''wrap together libs'''

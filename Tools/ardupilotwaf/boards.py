@@ -60,13 +60,13 @@ class Board:
              (cfg.env.BOARD_FLASH_SIZE > 1024)))):
 
             env.DEFINES.update(
-                AP_SCRIPTING_ENABLED = 0,
+                AP_SCRIPTING_ENABLED = 1,
                 LUA_32BITS = 1,
                 )
 
             env.AP_LIBRARIES += [
-#                'AP_Scripting',
-#                'AP_Scripting/lua/src',
+                'AP_Scripting',
+                'AP_Scripting/lua/src',
                 ]
 
         else:
@@ -867,7 +867,7 @@ class esp32(Board):
         cfg.load('esp32')
         
         self.set_defines(env)
-        
+        cfg.env.DISABLE_SCRIPTING = True
         tt = self.name[5:] #leave off 'esp32' so we just get 'buzz','diy','icarus, etc
         
         # this makes sure we get the correct subtype
