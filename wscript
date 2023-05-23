@@ -530,7 +530,7 @@ def configure(cfg):
         cfg.end_msg('disabled', color='YELLOW')
     else:
         cfg.end_msg('enabled')
-        cfg.recurse('libraries/AP_Scripting')
+      #  cfg.recurse('libraries/AP_Scripting')
 
     cfg.recurse('libraries/AP_GPS')
 
@@ -772,11 +772,12 @@ def _build_recursion(bld):
         if bld.env.IOMCU_FW:
             dirs_to_recurse.append('libraries/AP_IOMCU/iofirmware')
 
-    if bld.env.PERIPH_FW is not None:
+    if bld.env.PERIPH_FW == 1:
+        bld.env['PERIPH_FW'] = 1
         if bld.env.PERIPH_FW:
             dirs_to_recurse.append('Tools/AP_Periph')
 
-    dirs_to_recurse.append('libraries/AP_Scripting')
+   # dirs_to_recurse.append('libraries/AP_Scripting')
 
     if bld.env.ENABLE_ONVIF:
         dirs_to_recurse.append('libraries/AP_ONVIF')

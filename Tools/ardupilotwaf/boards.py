@@ -60,20 +60,20 @@ class Board:
              (cfg.env.BOARD_FLASH_SIZE > 1024)))):
 
             env.DEFINES.update(
-                AP_SCRIPTING_ENABLED = 1,
+                AP_SCRIPTING_ENABLED = 0,
                 LUA_32BITS = 1,
                 )
 
             env.AP_LIBRARIES += [
-                'AP_Scripting',
-                'AP_Scripting/lua/src',
+#                'AP_Scripting',
+#                'AP_Scripting/lua/src',
                 ]
 
         else:
             cfg.options.disable_scripting = True
 
         # allow GCS disable for AP_DAL example
-        if cfg.options.no_gcs:
+ #       if cfg.options.no_gcs:
             env.CXXFLAGS += ['-DHAL_GCS_ENABLED=0']
 
         # configurations for XRCE-DDS
@@ -610,7 +610,6 @@ def get_ap_periph_boards_in_dir(dir):
                     if 'AP_PERIPH' in content:
                         list_ap.append(d)
                         continue
-
     list_ap = list(set(list_ap))
     return list_ap
 
