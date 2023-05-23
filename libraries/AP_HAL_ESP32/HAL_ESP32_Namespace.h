@@ -19,4 +19,10 @@ class GPIO;
 class DigitalSource;
 class Storage;
 class RmtSigReader;
+#if HAL_NUM_CAN_IFACES
+class CANIface;
+#endif
+#if HAL_BUILD_AP_PERIPH
+class EventSource;
+#endif
 }  // namespace ESP32

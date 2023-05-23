@@ -268,13 +268,14 @@ bool Util::was_watchdog_reset() const
            || reason == ESP_RST_WDT;
 }
 
-#if CH_DBG_ENABLE_STACK_CHECK == TRUE
+#if (CH_DBG_ENABLE_STACK_CHECK == TRUE) || HAL_BUILD_AP_PERIPH
 /*
   display stack usage as text buffer for @SYS/threads.txt
  */
+
 size_t Util::thread_info(char *buf, size_t bufsize)
 {
-    thread_t *tp;
+    //thread_t *tp;
     size_t total = 0;
 
     // a header to allow for machine parsers to determine format

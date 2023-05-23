@@ -43,7 +43,6 @@
 #define HAL_Semaphore ESP32::Semaphore
 #endif
 
-#define HAL_NUM_CAN_IFACES 0
 #define HAL_MEM_CLASS HAL_MEM_CLASS_192
 
 // disable uncommon stuff that we'd otherwise get 
