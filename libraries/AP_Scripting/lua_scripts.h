@@ -13,6 +13,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#if AP_SCRIPTING_ENABLED
 
 #include <AP_Common/AP_Common.h>
 #include <AP_Param/AP_Param.h>
@@ -132,3 +133,4 @@ public:
     static AP_HAL::Semaphore* get_last_error_semaphore() { return &error_msg_buf_sem; }
 
 };
+#endif

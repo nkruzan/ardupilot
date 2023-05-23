@@ -1,3 +1,4 @@
+#if AP_SCRIPTING_ENABLED
 #include <AP_Common/AP_Common.h>
 #include <AP_HAL/HAL.h>
 #include <AP_Logger/AP_Logger.h>
@@ -578,3 +579,4 @@ int lua_get_current_ref()
     auto *scripting = AP::scripting();
     return scripting->get_current_ref();
 }
+#endif

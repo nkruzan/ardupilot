@@ -1,3 +1,4 @@
+#if AP_SCRIPTING_ENABLED
 #include <AP_HAL/AP_HAL.h>
 #include "lua_boxed_numerics.h"
 #include <AP_Scripting/lua_generated_bindings.h>
@@ -132,3 +133,4 @@ int uint32_t___tostring(lua_State *L) {
 
     return 1;
 }
+#endif

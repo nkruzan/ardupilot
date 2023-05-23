@@ -17,6 +17,7 @@
  */
  
 #pragma once
+#if AP_SCRIPTING_ENABLED
 
 #include <AP_CANManager/AP_CANSensor.h>
 
@@ -77,3 +78,4 @@ private:
 };
 
 #endif // HAL_MAX_CAN_PROTOCOL_DRIVERS
+#endif
