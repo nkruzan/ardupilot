@@ -34,7 +34,9 @@ void RCInput::init()
 #ifdef HAL_ESP32_RCIN
     sig_reader.init();
 #endif
+#if AP_RCPROTOCOL_ENABLED
     _init = true;
+#endif 
 }
 
 bool RCInput::new_input()
@@ -95,8 +97,9 @@ void RCInput::_timer_tick(void)
         return;
     }
 
+#if AP_RCPROTOCOL_ENABLED
     AP_RCProtocol &rcprot = AP::RC();
-
+#endif
 #ifdef HAL_ESP32_RCIN
     uint32_t width_s0, width_s1;
     while (sig_reader.read(width_s0, width_s1)) {

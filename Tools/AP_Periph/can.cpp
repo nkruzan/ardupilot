@@ -36,6 +36,11 @@
 #include <AP_HAL_ChibiOS/hwdef/common/watchdog.h>
 #elif CONFIG_HAL_BOARD == HAL_BOARD_SITL
 #include <AP_HAL_SITL/CANSocketIface.h>
+#elif CONFIG_HAL_BOARD == HAL_BOARD_ESP32
+#include <AP_HAL_ESP32/CANIface.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include "esp_system.h"
 #endif
 
 #define IFACE_ALL ((1U<<(HAL_NUM_CAN_IFACES+1U))-1U)
