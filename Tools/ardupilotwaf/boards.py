@@ -552,7 +552,7 @@ def add_dynamic_boards_esp32():
         hwdef = os.path.join(dirname, d, 'hwdef.dat')
         if os.path.exists(hwdef):
             this_variant = None
-            variants = sorted(['esp32','esp32s3','esp32sitl','esp32s3sitl','esp32periph','esp32s3periph','esp32periphsitl','esp32s3periphsitl'],key=len,reverse=True)
+            variants = sorted(['esp32','esp32s3','esp32s2','esp32sitl','esp32s3sitl','esp32periph','esp32s3periph','esp32periphsitl','esp32s3periphsitl'],key=len,reverse=True)
             for variant in variants:
                 l = len(variant)
                 if (d[0:l] == variant):
@@ -563,6 +563,8 @@ def add_dynamic_boards_esp32():
                 newclass = type(d, (esp32,), {'name': d})
             elif (this_variant == "esp32s3"):
                 newclass = type(d, (esp32s3,), {'name': d})
+            elif (this_variant == "esp32s2"):
+                newclass = type(d, (esp32s2,), {'name': d})
             elif (this_variant == "esp32sitl"):
                 newclass = type(d, (esp32sim,), {'name': d})
             elif (this_variant == "esp32s3sitl"):
@@ -918,6 +920,10 @@ class esp32(Board):
 class esp32s3(esp32):
     abstract = True
     toolchain = 'xtensa-esp32s3-elf'
+
+class esp32s2(esp32):
+    abstract = True
+    toolchain = 'xtensa-esp32s2-elf'
 
 class chibios(Board):
     abstract = True

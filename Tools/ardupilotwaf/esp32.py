@@ -18,8 +18,21 @@ import pickle
 import subprocess
 
 def configure(cfg):
+    target = None
     mcu_esp32s3 = True if (cfg.variant[0:7] == "esp32s3") else False
-    target = "esp32s3" if mcu_esp32s3 else "esp32"
+    mcu_esp32s2 = True if (cfg.variant[0:7] == "esp32s2") else False
+    if (cfg.variant[0:7] == "esp32s3"):
+        target = "esp32s3"
+    elif (cfg.variant[0:7] == "esp32s2"):
+        target = "esp32s2"
+    elif (cfg.variant[0:7] == "esp32"):
+        target = "esp32"
+    else:
+        target = None
+        
+    if target is None:
+        print('error is MCU esp32???')
+        quit()
     bldnode = cfg.bldnode.make_node(cfg.variant)
     def srcpath(path):
         return cfg.srcnode.make_node(path).abspath()
