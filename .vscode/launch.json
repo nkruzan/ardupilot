@@ -24,14 +24,20 @@
                 "text": "set remotetimeout 20"
               },
               {
-                "text": "target remote 127.0.0.1:3333"
+                "text": "target extended-remote :3333"
               },
               {
                 "text": "set remote hardware-watchpoint-limit 2"
               },
-               {
-                 "text": "monitor reset halt"
-               },
+              {
+                "text": "monitor reset halt"
+              },
+              {
+                "text": "maintenance flush register-cache"
+              },
+              {
+                "text": "thb app_main"
+              },
               // {
               //   "text": "flushregs"
               // }
