@@ -1,0 +1,59 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "esp32s3 - Debug",
+            "gdbpath": "fixme/xtensa-esp32-elf/bin/xtensa-esp32s3-elf-gdb",
+            "type": "gdb",
+            "request": "attach",
+            "executable" : "${workspaceRoot}/build/ardupilot.elf",
+            "target": ":1234",
+            "remote": true,
+            "cwd": "${workspaceRoot}"
+        },
+
+        {
+            "name": "ESP32 OpenOCD",
+            "type": "cppdbg",
+            "request": "launch",
+            "miDebuggerPath": "fixme/xtensa-esp32-elf/bin/xtensa-esp32s3-elf-gdb",
+            "cwd": "${workspaceFolder}/build",
+            "program": "${workspaceRoot}/build/ardupilot.elf",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              },
+              {
+                // there's a bug in vs code that prevents us from using ${workspaceFolder} variable.
+                // update the path as needed
+                "text": "file 'fixme/build/ardupilot.elf'"
+              },
+              {
+                "text": "target remote 127.0.0.1:3333"
+              },
+              {
+                "text": "set remote hardware-watchpoint-limit 2"
+              },
+              {
+                "text": "monitor reset halt"
+              },
+              {
+                "text": "flushregs"
+              }
+            ],
+            "externalConsole": false,
+      
+            "logging": {
+              // "trace": true,
+              // "traceResponse": true,
+              //"engineLogging": true
+            }
+          },
+
+    ]
+}
