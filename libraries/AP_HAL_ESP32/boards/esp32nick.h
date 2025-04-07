@@ -66,10 +66,10 @@
 //	gain/multiplier,
 //	the ardupilot name for the pin in parameter/s.
 #define HAL_ESP32_ADC_PINS {\
-	{ADC1_GPIO35_CHANNEL, 11, 34},\
-	{ADC1_GPIO34_CHANNEL, 11, 35},\
-	{ADC1_GPIO39_CHANNEL, 11, 39},\
-	{ADC1_GPIO36_CHANNEL, 11, 36}\
+	{ADC1_GPIO35_CHANNEL, ADC1_GAIN, GPIO_NUM_34},\
+	{ADC1_GPIO34_CHANNEL, ADC1_GAIN, GPIO_NUM_35},\
+	{ADC1_GPIO39_CHANNEL, ADC1_GAIN, GPIO_NUM_39},\
+	{ADC1_GPIO36_CHANNEL, ADC1_GAIN, GPIO_NUM_36}\
 }
 
 //-----COMPASS-----
@@ -106,8 +106,8 @@
 
 //-----RCIN-----
 #define HAL_ESP32_RCIN GPIO_NUM_4
-//RMT pin number
-#define HAL_ESP32_RMT_RX_PIN_NUMBER			4
+#define HAL_ESP32_RMT_RX_PIN_NUMBER		GPIO_NUM_4
+
 //-----UARTS-----
 #define HAL_ESP32_UART_DEVICES \
   {.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 } \
