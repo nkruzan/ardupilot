@@ -17,8 +17,8 @@
 #define HAL_ESP32_BOARD_NAME "esp32-nick"
 #define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
 
-#define TRUE						1
-#define FALSE						0
+//some helper macros
+//---make sensor selection clearer
 
 // make sensor selection clearer
 #define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
@@ -35,6 +35,13 @@
 //------------------------------------
 
 
+//---readability
+#define TRUE					1
+#define FALSE					0
+#define WIFI_TYPE_TCP			1
+#define WIFI_TYPE_UDP			2
+#define ADC1_GAIN 				11
+//---auto wifi ssid from board name
 #define WIFI_CONCAT(x, y) x y
 #define WIFI_PREFIX 			"ardupilot-"
 #define WIFI_SUFFIX 			HAL_ESP32_BOARD_NAME
