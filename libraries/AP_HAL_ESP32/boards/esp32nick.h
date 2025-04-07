@@ -19,8 +19,6 @@
 
 //some helper macros
 //---make sensor selection clearer
-
-// make sensor selection clearer
 #define PROBE_IMU_I2C(driver, bus, addr, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,GET_I2C_DEVICE(bus, addr),##args))
 #define PROBE_IMU_SPI(driver, devname, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname),##args))
 #define PROBE_IMU_SPI2(driver, devname1, devname2, args ...) ADD_BACKEND(AP_InertialSensor_ ## driver::probe(*this,hal.spi->get_device(devname1),hal.spi->get_device(devname2),##args))
@@ -32,8 +30,6 @@
 #define PROBE_MAG_SPI(driver, devname, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe(hal.spi->get_device(devname),##args))
 #define PROBE_MAG_IMU(driver, imudev, imu_instance, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(imu_instance,##args))
 #define PROBE_MAG_IMU_I2C(driver, imudev, bus, addr, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(GET_I2C_DEVICE(bus,addr),##args))
-//------------------------------------
-
 
 //---readability
 #define TRUE					1
@@ -48,14 +44,15 @@
 #define WIFI_SSID_NAME 			WIFI_CONCAT(WIFI_PREFIX, WIFI_SUFFIX)
 
 //-----INS/IMU-----
-#define HAL_INS_DEFAULT HAL_INS_MPU9250_SPI
-#define HAL_INS_MPU9250_NAME "mpu9250"
+#define HAL_INS_DEFAULT 		HAL_INS_MPU9250_SPI
+#define HAL_INS_MPU9250_NAME 	"mpu9250"
 #define HAL_INS_PROBE_LIST PROBE_IMU_SPI( Invensense, HAL_INS_MPU9250_NAME, ROTATION_NONE)
 
 // -----BARO-----
-#define HAL_BARO_DEFAULT HAL_BARO_BMP280_SPI
-#define HAL_BARO_BMP280_NAME "BMP280"
+#define HAL_BARO_DEFAULT 		HAL_BARO_BMP280_SPI
+#define HAL_BARO_BMP280_NAME 	"BMP280"
 #define HAL_BARO_PROBE_LIST PROBE_BARO_SPI(BMP280, "bmp280")
+
 // allow boot without a baro
 #define HAL_BARO_ALLOW_INIT_NO_BARO TRUE
 
@@ -77,6 +74,8 @@
 #define HAL_PROBE_EXTERNAL_I2C_COMPASSES 	TRUE
 #define ALLOW_ARM_NO_COMPASS 				TRUE
 #define AP_COMPASS_AK8963_ENABLED 			TRUE
+#define HAL_COMPASS_DEFAULT 				HAL_COMPASS_AK8963_MPU9250
+
 //-----WIFI-----
 #define HAL_ESP32_WIFI 	WIFI_TYPE_UDP
 
@@ -105,33 +104,35 @@
 	{.port=I2C_NUM_0, .sda=GPIO_NUM_13, .scl=GPIO_NUM_12, .speed=400*KHZ, .internal=true}
 
 //-----RCIN-----
-#define HAL_ESP32_RCIN GPIO_NUM_4
+#define HAL_ESP32_RCIN 					GPIO_NUM_4
 #define HAL_ESP32_RMT_RX_PIN_NUMBER		GPIO_NUM_4
 
 //-----UARTS-----
 #define HAL_ESP32_UART_DEVICES \
-  {.port=UART_NUM_0, .rx=GPIO_NUM_3, .tx=GPIO_NUM_1 } \
-  ,{.port=UART_NUM_1, .rx=GPIO_NUM_16, .tx=GPIO_NUM_17 }
+  {	.port=UART_NUM_0, .rx=GPIO_NUM_3, 	.tx=GPIO_NUM_1 } \
+  ,{.port=UART_NUM_1, .rx=GPIO_NUM_16, 	.tx=GPIO_NUM_17 }
 
 //FILESYSTEM SUPPORT
 #define HAVE_FILESYSTEM_SUPPORT 		TRUE
 #define HAL_OS_POSIX_IO 				TRUE
-#define HAL_BOARD_STORAGE_DIRECTORY "/SDCARD/APM/STORAGE"
+#define HAL_BOARD_STORAGE_DIRECTORY 	"/SDCARD/APM/STORAGE"
 #define HAL_ESP32_SDMMC 				TRUE
 #define HAL_ESP32_SDCARD 				TRUE
 
 //LOGGING
-#define HAL_BOARD_LOG_DIRECTORY "/SDCARD/APM/LOGS"
+#define HAL_BOARD_LOG_DIRECTORY 		"/SDCARD/APM/LOGS"
 #define LOGGER_MAVLINK_SUPPORT 			TRUE
 #define HAL_LOGGING_BACKENDS_DEFAULT 	TRUE
 #define HAL_LOGGING_DATAFLASH_ENABLED	FALSE
 #define HAL_LOGGING_MAVLINK_ENABLED		FALSE
+
 //TERRAIN
-#define HAL_BOARD_TERRAIN_DIRECTORY "/SDCARD/APM/TERRAIN"
+#define HAL_BOARD_TERRAIN_DIRECTORY 	"/SDCARD/APM/TERRAIN"
 
 // see boards.py
 #ifndef ENABLE_HEAP
 #define ENABLE_HEAP TRUE
 #endif
+
 //OTHER DEFAULTS
 #define AP_SCRIPTING_ENABLED 			FALSE
