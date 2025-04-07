@@ -15,7 +15,7 @@
 #pragma once
 
 #define HAL_ESP32_BOARD_NAME "esp32-nick"
-// CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
+#define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
 
 #define TRUE						1
 #define FALSE						0
@@ -34,7 +34,7 @@
 #define PROBE_MAG_IMU_I2C(driver, imudev, bus, addr, args ...) ADD_BACKEND(DRIVER_ ##driver, AP_Compass_ ## driver::probe_ ## imudev(GET_I2C_DEVICE(bus,addr),##args))
 //------------------------------------
 
-#define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
+
 #define WIFI_CONCAT(x, y) x y
 #define WIFI_PREFIX 			"ardupilot-"
 #define WIFI_SUFFIX 			HAL_ESP32_BOARD_NAME
