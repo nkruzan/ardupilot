@@ -35,6 +35,10 @@
 //------------------------------------
 
 #define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_ESP32_NICK
+#define WIFI_CONCAT(x, y) x y
+#define WIFI_PREFIX 			"ardupilot-"
+#define WIFI_SUFFIX 			HAL_ESP32_BOARD_NAME
+#define WIFI_SSID_NAME 			WIFI_CONCAT(WIFI_PREFIX, WIFI_SUFFIX)
 
 //-----INS/IMU-----
 #define HAL_INS_DEFAULT HAL_INS_MPU9250_SPI
@@ -68,9 +72,8 @@
 #define AP_COMPASS_AK8963_ENABLED TRUE
 //-----WIFI-----
 
-#define HAL_ESP32_WIFI 1  // 2 use udp, 1 use tcp
-#define WIFI_SSID "ardupilot123"
-#define WIFI_PWD "ardupilot123"
+#define WIFI_SSID 		WIFI_SSID_NAME // ardupilot-<HAL_ESP32_BOARD_NAME>
+#define WIFI_PWD  		"ardupilot123"
 
 //-----RCOUT-----
 #define HAL_ESP32_RCOUT { \
