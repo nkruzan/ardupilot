@@ -2096,7 +2096,13 @@ check_sample:
         const uint8_t wait_per_loop = 100;
         const uint8_t wait_counter_limit = uint32_t(_loop_delta_t * 1.0e6) / (3*wait_per_loop);
 
+        uint32_t loop_counter = 0;
         while (true) {
+            if (loop_counter++ > 1000) {
+                // this is a safety check to avoid infinite loops
+                // in case we never get a sample
+                break;
+            }
             for (uint8_t i=0; i<_backend_count; i++) {
                 // this is normally a nop, but can be used by backends
                 // that don't accumulate samples on a timer
